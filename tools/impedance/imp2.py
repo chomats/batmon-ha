@@ -2,7 +2,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 import tools.impedance.datasets as datasets
-from tools.impedance.data import fetch_batmon_ha_sensors
 from tools.impedance.stats import cov
 
 # df = datasets.ant24_2023_07()

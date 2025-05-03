@@ -6,7 +6,6 @@ from bmslib.util import get_logger, dict_to_short_string
 
 logger = get_logger()
 
-
 class BatterySwitches:
     def __init__(self, charge: Optional[bool] = None, discharge: Optional[bool] = None):
         self.charge = charge

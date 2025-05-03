@@ -13,3 +13,8 @@ tools/impedance/influxdb_*.json
 user_id
 
 *.pickle
+/config.ini
+/batmon-ha.jkbms-app.log
+/batmon-ha.jkbms-app.log.*
+/batmon-ha.jkbms-app-err.log
+/batmon-ha.jkbms-app-err.log*

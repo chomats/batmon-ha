@@ -1,0 +1,44 @@
+{
+  "devices": [
+    {
+      "alias": "bat0",
+      "address_serial": "3",
+      "name": "bat0"
+    },
+    {
+      "alias": "bat1",
+      "address_serial": "1",
+      "name": "bat1"
+    },
+    {
+      "alias": "bat1",
+      "address_serial": "2",
+      "name": "bat2"
+    }
+  ],
+  "keep_alive": true,
+  "verbose_log": false,
+  "sample_period": 1.0,
+  "publish_period": 2.0,
+  "invert_current": true,
+  "watchdog": true,
+  "expire_values_after": 200,
+  "mqtt_user": "mosch",
+  "mqtt_password": "Mmdp-3325",
+  "mqtt_broker": "192.168.1.61:1883",
+  "mqtt_port": "1883",
+  "serial_port" : "/dev/ttyUSB0",
+  "console_log": true,
+  "log_levels": {
+    "mqtt": "INFO",
+    "callback": "INFO",
+    "config": "INFO",
+    "main": "INFO",
+    "logging": "WARN",
+    "store": "INFO",
+    "sampling": "INFO"
+  }
+}
+
+
+

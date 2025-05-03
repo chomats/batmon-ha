@@ -6,10 +6,7 @@ from os.path import isfile
 from threading import Lock
 
 from bmslib.cache import random_str
-from bmslib.util import dotdict, get_logger
-
-logger = get_logger()
-
+from bmslib.util import dotdict, get_logger_child
 
 def is_readable(file):
     return isfile(file) and access(file, R_OK)
@@ -48,6 +45,7 @@ def store_algorithm_state(bms_name, algorithm_name, state=None):
                 f.seek(0)
                 bms_state = json.load(f)
             except:
+                logger = get_logger_child("store")
                 logger.info('init %s bms state storage', bms_name)
                 bms_state = dict(algorithm_state=dict())
 
@@ -58,24 +56,26 @@ def store_algorithm_state(bms_name, algorithm_name, state=None):
 
             return bms_state['algorithm_state'].get(algorithm_name, None)
 
+g_conf = None
 
-def load_user_config():
-    try:
-        with open('/data/options.json') as f:
-            conf = dotdict(json.load(f))
-            _user_config_migrate_addresses(conf)
-    except Exception as e:
-        logger.warning('error reading /data/options.json, trying options.json %s', e)
-        with open('options.json') as f:
-            conf = dotdict(json.load(f))
+def get_user_config(file_name='options.json'):
+    global g_conf
+    if g_conf is None:
+        g_conf = _load_user_config(file_name)
+    return g_conf
+
+def _load_user_config(file_name='options.json'):
+    with open(file_name) as f:
+        conf = dotdict(json.load(f))
     return conf
 
 
-def _user_config_migrate_addresses(conf):
+def user_config_migrate_addresses(conf):
     changed = False
     slugs = ["daly", "jbd", "jk", "sok", "victron"]
     conf["devices"] = conf.get('devices') or []
     devices_by_address = {d['address']: d for d in conf["devices"]}
+    logger = get_logger_child("store")
     for slug in slugs:
         addr = conf.get(f'{slug}_address')
         if addr and not devices_by_address.get(addr):

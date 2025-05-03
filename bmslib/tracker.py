@@ -16,7 +16,7 @@ from typing import Optional, Tuple
 
 import numpy as np
 
-from bmslib.util import dotdict, get_logger
+from bmslib.util import get_logger
 
 logger = get_logger()
 

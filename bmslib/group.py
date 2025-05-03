@@ -5,9 +5,8 @@ from copy import copy
 from typing import Dict, Iterable, List
 
 from bmslib.bms import BmsSample
-from bmslib.bt import BtBms
+from bmslib.sampling import BmsSampler
 from bmslib.util import get_logger
-
 
 class BmsGroup:
 
@@ -18,11 +17,11 @@ class BmsGroup:
         self.voltages: Dict[str, List[int]] = {}
         # self.max_sample_age = 0
 
-    def update(self, bms: BtBms, sample: BmsSample):
+    def update(self, bms: BmsSampler, sample: BmsSample):
         assert bms.name in self.bms_names, "bms %s not in group %s" % (bms.name, self.bms_names)
         self.samples[bms.name] = copy(sample)
 
-    def update_voltages(self, bms: BtBms, voltages: List[int]):
+    def update_voltages(self, bms: BmsSampler, voltages: List[int]):
         assert bms.name in self.bms_names, "bms %s not in group %s" % (bms.name, self.bms_names)
         self.voltages[bms.name] = copy(voltages)
 
@@ -51,7 +50,7 @@ class VirtualGroupBms:
         self.name = name
         self.group = BmsGroup(name)
         self.verbose_log = verbose_log
-        self.members: List[BtBms] = []
+        self.members: List[BmsSampler] = []
         self.logger = get_logger(verbose_log)
 
     def __str__(self):
@@ -67,7 +66,7 @@ class VirtualGroupBms:
 
     @property
     def connect_time(self):
-        return max(bms.connect_time for bms in self.members)
+        return 0
 
     def debug_data(self):
         return "missing %s" % (set(self.group.bms_names) - set(self.group.samples.keys()))
@@ -82,7 +81,7 @@ class VirtualGroupBms:
     def set_keep_alive(self, keep):
         pass
 
-    def add_member(self, bms: BtBms):
+    def add_member(self, bms: BmsSampler):
         self.group.bms_names.append(bms.name)
         self.members.append(bms)
 
@@ -122,10 +121,8 @@ class VirtualGroupBms:
     async def fetch_device_info(self):
         raise NotImplementedError()
 
-
 def is_finite(x):
     return x is not None and math.isfinite(x)
-
 
 def finite_or_fallback(x, fallback):
     return x if is_finite(x) else fallback

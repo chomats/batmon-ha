@@ -3,7 +3,6 @@ import math
 import numpy as np
 
 from tools.impedance import stats
-from tools.impedance.stats import cov
 
 
 def estimate(u, i, ignore_nan=False):

@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.82.1]
+* Add logs + timeout + voltage
 ## [1.83]
 * Add Seplos BMS ([BMS_BLE-HA](https://github.com/patman15/BMS_BLE-HA) wrapper)
 * Ignore influxdb setup error
@@ -143,7 +145,6 @@ this is a rather big update. I've set version num to 1.0, so it looks more tidy.
 
 ## [0.0.63] - 2023-05-09
 
-* Add option `bt_power_cycle` to power cycle the Bluetooth hardware on start-up
 * Add info about bleak version and BMS device info on failures
 * Fix `InvalidStateError`
 * Fix `adapter` setting being ignored

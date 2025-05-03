@@ -15,25 +15,6 @@ profile batmon flags=(attach_disconnected,mediate_deleted) {
     dbus (send, receive) bus=system interface=org.freedesktop.DBus peer=(label=unconfined),
 
     # ###
-    # included from https://github.com/jdstrand/snapd/blob/4befc00e3318a3231e96b38b575bf6e637ddad6c/interfaces/builtin/bluez.go
-    # ###
-    dbus (receive, send)
-      bus=system
-      interface=org.bluez.*
-      peer=(label=unconfined),
-    dbus (receive, send)
-      bus=system
-      path=/org/bluez{,/**}
-      interface=org.freedesktop.DBus.*
-      peer=(label=unconfined),
-    dbus (receive, send)
-      bus=system
-      path=/
-      interface=org.freedesktop.DBus.*
-      peer=(label=unconfined),
-
-
-    # ###
     # included from https://developers.home-assistant.io/docs/add-ons/presentation#apparmor
     # ###
     signal (send) set=(kill,term,int,hup,cont),
@@ -53,6 +34,7 @@ profile batmon flags=(attach_disconnected,mediate_deleted) {
     /etc/cont-finish.d/** rwix,
     /run/{,**} rwk,
     /dev/tty rw,
+    /dev/ttyUSB* rw,
 
     # Bashio
     /usr/lib/bashio/** ix,

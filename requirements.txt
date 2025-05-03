@@ -1,13 +1,19 @@
+paho-mqtt==2.1.0
+crcmod~=1.7
+pyserial~=3.5
+numpy~=2.3.2
 
-bleak==0.20.2 # see Dockerfile
+#bleak==0.20.2 # see Dockerfile
 #bleak-retry-connector
 
-paho-mqtt==2.1.0
-backoff
-crcmod
-
-pyserial
+#backoff~=2.2.1
 
 #influxdb # see Dockerfile
 # the influxdb package appears to be not available from some platforms, so install it only if needed
 # see https://github.com/fl4p/batmon-ha/issues/147 (rpi 3)
+
+#pandas~=2.3.1
+#pytz~=2024.1
+#python-dateutil~=2.8.2
+#utils~=1.0.2
+#battery~=1.0.3
