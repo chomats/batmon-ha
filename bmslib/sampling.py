@@ -83,7 +83,8 @@ class BmsSampler:
                  algorithms: Optional[list] = None,
                  current_calibration_factor=1.0,
                  over_power=None,
-                 bms_group: Optional[BmsGroup] = None
+                 bms_group: Optional[BmsGroup] = None,
+                 publish_index=True
                  ):
 
         self.bms = bms
@@ -96,6 +97,7 @@ class BmsSampler:
         self.bms_group = bms_group  # group, virtual, parent
         self.current_calibration_factor = current_calibration_factor
         self.over_power = over_power or math.nan
+        self.publish_index = publish_index
 
         self.sinks = sinks or []
 
@@ -317,13 +319,11 @@ class BmsSampler:
 
             async def cached_fetch_voltages():
                 nonlocal voltages, err
-                if voltages:
-                    return voltages
 
                 # TODO fetch_voltages at t_fetch interval and down-sampling?
                 try:
                     voltages = await bms.fetch_voltages()
-
+                    
                     if self.bms_group:
                         self.bms_group.update_voltages(bms, voltages)
                 except:
@@ -363,7 +363,7 @@ class BmsSampler:
                 log_data and logger.info('%s: %s', bms.name, sample)
 
                 voltages = await cached_fetch_voltages()
-                publish_cell_voltages(mqtt_client, device_topic=self.mqtt_topic_prefix, voltages=voltages)
+                publish_cell_voltages(mqtt_client, device_topic=self.mqtt_topic_prefix, voltages=voltages, publish_index=self.publish_index, bms_name=bms.name)
 
                 # temperatures = None
                 if self.period_30s or self.period_discov:

@@ -50,7 +50,7 @@ class BLEDeviceResolver:
         return BLEDeviceResolver.devices.get(key, None)
 
 
-class BMS():
+class BMS:
 
     def __init__(self, address,  type, module=None, keep_alive=False, adapter=None, name=None, **kwargs):
         self.address = address

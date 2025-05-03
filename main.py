@@ -234,6 +234,7 @@ async def main():
     publish_period = float(user_config.get('publish_period', sample_period))
     expire_values_after = float(user_config.get('expire_values_after', MIN_VALUE_EXPIRY))
     ic = user_config.get('invert_current', False)
+    publish_index = user_config.get('publish_index', True)
 
     sinks = []
     if user_config.get('influxdb_host', None):
@@ -262,6 +263,7 @@ async def main():
         current_calibration_factor=float(dev_args[bms.name].get('current_calibration', 1.0)),
         bms_group=groups_by_bms.get(bms.name),
         sinks=sinks,
+        publish_index=publish_index
     ) for bms in bms_list]
 
     # move groups to the end

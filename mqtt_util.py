@@ -118,16 +118,17 @@ _last_values = {}
 _last_publish_time = 0.
 
 
-def mqtt_single_out(client: paho.Client, topic, data, retain=False):
+def mqtt_single_out(client: paho.Client, topic, data, retain=True):
     # logger.debug(f'Send data: {data} on topic: {topic}, retain flag: {retain}')
     # print('mqtt: ' + topic, data)
     # return
     if client is None:
-        return
+        logger.warning('mqtt publish %s no client', topic)
+        return False
 
     lv = _last_values.get(topic, None)
-    if lv and lv[1] == data and (time.time() - lv[0]) < (MIN_VALUE_EXPIRY / 2):
-        logger.debug('topic %s data not changed', topic)
+    now = time.time()
+    if lv and lv[1] == data and (now - lv[0]) < (MIN_VALUE_EXPIRY / 2):
         return False
 
     mqi: paho.MQTTMessageInfo = client.publish(topic, data, retain=retain)
@@ -136,10 +137,10 @@ def mqtt_single_out(client: paho.Client, topic, data, retain=False):
             logger.warning('mqtt publish %s failed: %s %s', topic, mqi.rc, mqi)
         return False
 
-    now = time.time()
     _last_values[topic] = now, data
     global _last_publish_time
     _last_publish_time = now
+    return True
 
 
 def mqtt_last_publish_time():
@@ -163,6 +164,7 @@ sample_desc = {
         "state_class": "measurement",
         "unit_of_measurement": "V",
         "precision": 4,
+        "accuracy_decimals": 2,
         "icon": "meter-electric"},
     "soc/current": {
         "field": "current",
@@ -239,6 +241,7 @@ def publish_sample(client, device_topic, sample: BmsSample):
     for k, v in sample_desc.items():
         topic = f"{device_topic}/{k}"
         s = round_to_n(getattr(sample, v['field']), v.get('precision', 5))
+        logger.debug("publish_sample %s: %s", topic, f"{s}")
         if not is_none_or_nan(s):
             mqtt_single_out(client, topic, s)
 
@@ -246,10 +249,11 @@ def publish_sample(client, device_topic, sample: BmsSample):
         for switch_name, switch_state in sample.switches.items():
             assert isinstance(switch_state, bool)
             topic = f"{device_topic}/switch/{switch_name}"
+            logger.debug("publish_sample %s: %s", topic, f"{switch_state}")
             mqtt_single_out(client, topic, 'ON' if switch_state else 'OFF')
 
 
-def publish_cell_voltages(client, device_topic, voltages):
+def publish_cell_voltages(client, device_topic, voltages, publish_index, bms_name):
     # "highest_voltage": parts[0] / 1000,
     # "highest_cell": parts[1],
     # "lowest_voltage": parts[2] / 1000,
@@ -266,12 +270,20 @@ def publish_cell_voltages(client, device_topic, voltages):
         x = range(len(voltages))
         high_i = max(x, key=lambda i: voltages[i])
         low_i = min(x, key=lambda i: voltages[i])
-        mqtt_single_out(client, f"{device_topic}/cell_voltages/min", voltages[low_i] / 1000)
-        mqtt_single_out(client, f"{device_topic}/cell_voltages/min_index", low_i + 1)
-        mqtt_single_out(client, f"{device_topic}/cell_voltages/max", voltages[high_i] / 1000)
-        mqtt_single_out(client, f"{device_topic}/cell_voltages/max_index", high_i + 1)
-        mqtt_single_out(client, f"{device_topic}/cell_voltages/delta", (voltages[high_i] - voltages[low_i]) / 1000)
+        voltage_min = voltages[low_i] / 1000
+        voltage_max = voltages[high_i] / 1000
+        voltage_delta = (voltages[high_i] - voltages[low_i]) / 1000
+        logger.debug("%s publish_cell_voltages (%s, %s, %s)", bms_name, f"{voltage_min}", f"{voltage_max}", f"{voltage_delta}")
+
+        if publish_index:
+            mqtt_single_out(client, f"{device_topic}/cell_voltages/min_index", low_i + 1)
+            mqtt_single_out(client, f"{device_topic}/cell_voltages/max_index", high_i + 1)
+
+        mqtt_single_out(client, f"{device_topic}/cell_voltages/min", voltage_min)
+        mqtt_single_out(client, f"{device_topic}/cell_voltages/max", voltage_max)
+        mqtt_single_out(client, f"{device_topic}/cell_voltages/delta", voltage_delta)
         mqtt_single_out(client, f"{device_topic}/cell_voltages/average", round(sum(voltages) / len(voltages)) / 1000)
+        mqtt_single_out(client, f"{device_topic}/cell_voltages/total", round(sum(voltages))/1000)
         mqtt_single_out(client, f"{device_topic}/cell_voltages/median", statistics.median(voltages) / 1000)
 
 
@@ -296,7 +308,7 @@ def publish_hass_discovery(client, device_topic, expire_after_seconds: int, samp
         "hw_version": (device_info and device_info.hw_version) or None,
     }
 
-    def _hass_discovery(k, device_class, unit, state_class=None, icon=None, name=None, long_expiry=False):
+    def _hass_discovery(k, device_class, unit, state_class=None, icon=None, name=None, long_expiry=False, precision_value=None):
         dm = {
             "unique_id": f"{device_topic}__{k.replace('/', '_')}",
             "name": name or k.replace('/', ' '),
@@ -307,6 +319,7 @@ def publish_hass_discovery(client, device_topic, expire_after_seconds: int, samp
             "state_topic": f"{device_topic}/{k}",
             "expire_after": max(expire_after_seconds, 3600 * 2) if long_expiry else expire_after_seconds,
             "device": device_json,
+            "precision": precision_value,
         }
         if icon:
             dm['icon'] = 'mdi:' + icon
@@ -317,18 +330,18 @@ def publish_hass_discovery(client, device_topic, expire_after_seconds: int, samp
     for k, d in sample_desc.items():
         if not is_none_or_nan(getattr(sample, d["field"])):
             _hass_discovery(k, d["device_class"], state_class=d["state_class"], unit=d["unit_of_measurement"],
-                            icon=d.get('icon', None), name=d["field"])
+                            icon=d.get('icon', None), name=d["field"], precision_value=d.get('precision', None))
 
     for i in range(0, num_cells):
         k = 'cell_voltages/%d' % (i + 1)
         n = 'Cell Volt %0*d' % (1 + int(math.log10(num_cells)), i + 1)
-        _hass_discovery(k, "voltage", name=n, unit="V")
+        _hass_discovery(k, "voltage", name=n, unit="V", precision_value=3)
 
     if num_cells > 1:
-        statistic_fields = ["min", "max", "average", "median", "delta"]
+        statistic_fields = ["min", "max", "average", "median", "delta", "total"]
         for f in statistic_fields:
             k = 'cell_voltages/%s' % f
-            _hass_discovery(k, name="Cell Volt %s" % f, device_class="voltage", unit="V")
+            _hass_discovery(k, name="Cell Volt %s" % f, device_class="voltage", unit="V", precision_value=3)
 
         for f in ["min_index", "max_index"]:
             k = 'cell_voltages/%s' % f
@@ -402,7 +415,7 @@ async def mqtt_process_action_queue():
 def subscribe_switches(mqtt_client: paho.Client, device_topic, bms: BtBms, switches):
     async def set_switch(switch_name: str, state: bool):
         assert isinstance(state, bool)
-        logger.info('Set %s %s switch %s', bms.name, switch_name, state)
+        logger.debug('Set %s %s switch %s', bms.name, switch_name, state)
         await bms.set_switch(switch_name, state)
         topic = f"{device_topic}/switch/{switch_name}"
         mqtt_single_out(mqtt_client, topic, 'ON' if state else 'OFF')

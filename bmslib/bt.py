@@ -233,7 +233,7 @@ class BtBms:
         from bmslib.group import VirtualGroupBms
         return isinstance(self, VirtualGroupBms)
 
-    async def connect(self, timeout=20):
+    async def connect(self, timeout=40):
         """
         Establish a BLE connection
         :param timeout:

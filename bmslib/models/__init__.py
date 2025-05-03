@@ -63,6 +63,7 @@ def get_bms_model_class(name):
         if k[:-4] in bms_registry:
             continue
         # print(k)
+        logger.info('Bms2 device %s', k[:-4])
         bms_registry[k[:-4]] = partial(models.BLE_BMS_wrap.BMS, type=k, module=getattr(plugins, k))
 
     return bms_registry.get(name)

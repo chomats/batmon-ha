@@ -52,7 +52,7 @@ class JKBt(BtBms):
     SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb"
     CHAR_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb"
 
-    TIMEOUT = 8
+    TIMEOUT = 80
 
     SOC_NOT_FULL_YET = 99.0  # when the gauge reaches 100% but no OV yet
     TEMPERATURE_STEP = 0.1
@@ -126,10 +126,12 @@ class JKBt(BtBms):
         """
 
         try:
-            await super().connect(timeout=6)
+            await super().connect(timeout=20)
         except Exception as e:
             self.logger.info("%s normal connect failed (%s), connecting with scanner", self.name, str(e) or type(e))
             await self._connect_with_scanner(timeout=timeout)
+
+        self.logger.info("%s normal connected", self.name)
 
         service = self.get_service(self.SERVICE_UUID)
         self.char_handle_write = self.find_char(self.CHAR_UUID, 'write', service=service)
@@ -156,6 +158,7 @@ class JKBt(BtBms):
         buf, _ = self._resp_table[0x01]
         self.num_cells = buf[114]
         assert 0 < self.num_cells <= 24, "num_cells unexpected %s" % self.num_cells
+        self.logger.info("%s normal connected - num_cells %s", self.name, self.num_cells)
         # self.capacity = int.from_bytes(buf[130:134], byteorder='little', signed=False) * 0.001
 
     async def disconnect(self):
