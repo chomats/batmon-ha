@@ -117,7 +117,7 @@ class JKBt(BtBms):
             for cb in callbacks:
                 cb(buf)
 
-    async def connect(self, timeout=20):
+    async def connect(self, timeout=40):
         """
         Connecting JK with bluetooth appears to require a prior bluetooth scan and discovery, otherwise the connectiong fails with
         `[org.bluez.Error.Failed] Software caused connection abort`. Maybe the scan triggers some wake up?
@@ -126,7 +126,7 @@ class JKBt(BtBms):
         """
 
         try:
-            await super().connect(timeout=20)
+            await super().connect(timeout)
         except Exception as e:
             self.logger.info("%s normal connect failed (%s), connecting with scanner", self.name, str(e) or type(e))
             await self._connect_with_scanner(timeout=timeout)

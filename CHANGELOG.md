@@ -1,7 +1,7 @@
 # Changelog
 
-## [1.84/1.85]
-* Add logs + change unit for voltage cell
+## [1.82.1]
+* Add logs + timeout + voltage
 ## [1.83]
 * Add Seplos BMS ([BMS_BLE-HA](https://github.com/patman15/BMS_BLE-HA) wrapper)
 * Ignore influxdb setup error
