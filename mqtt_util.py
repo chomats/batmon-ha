@@ -24,6 +24,20 @@ no_publish_fail_warn = False
 
 
 def round_to_n(x, n):
+    """
+    Rounds a given number `x` to `n` significant digits. Returns the formatted number
+    as a string. It gracefully handles cases when `x` is non-finite, a string, 
+    or zero. If the provided `n` is zero, the number is rounded to its nearest 
+    integer as a string.
+
+    :param x: The number to round. Must be a float or integer.
+    :type x: float | int
+    :param n: The number of significant digits to which `x` will be rounded.
+    :type n: int
+    :return: A string representation of `x`, rounded to `n` significant digits.
+    :rtype: str
+    :raises ValueError: If an invalid value is encountered during rounding.
+    """
     if isinstance(x, str) or not math.isfinite(x) or not x:
         return x
 
@@ -41,11 +55,31 @@ def round_to_n(x, n):
 
 
 def disable_warnings():
+    """
+    Disable warning notifications for publishing failures.
+
+    This function sets the global flag ``no_publish_fail_warn``
+    to ``True``, which disables warning notifications regarding
+    publishing failures. 
+
+    :return: None
+    """
     global no_publish_fail_warn
     no_publish_fail_warn = True
 
 
 def remove_none_values(fields: dict):
+    """
+    Removes keys from a dictionary where values are None, non-finite floats (NaN or
+    infinity), or empty strings. This function mutates the provided dictionary
+    in-place and eliminates entries with invalid or undesired values.
+
+    :param fields: A dictionary where keys map to values that will be evaluated 
+        for removal based on their validity.
+    :type fields: dict
+
+    :return: None
+    """
     for k in list(fields.keys()):
         v = fields[k]
         if v is None:
@@ -67,6 +101,22 @@ def remove_equal_values(fields: dict, other: dict):
 
 
 def build_mqtt_hass_config_discovery(base, topic):
+    """
+    Generates MQTT Home Assistant configuration discovery topic and data for a given
+    base and topic. This function is tailored for use with a system like Home Assistant
+    to enable automatic discovery and configuration of sensors or metrics for integration
+    with the MQTT platform.
+
+    :param base: The specific identifier or path for the metric being published, used to 
+        generate unique configuration details.
+    :type base: str
+    :param topic: The root or device-specific topic for all MQTT messages, used as an 
+        identifier for the device in MQTT and Home Assistant.
+    :type topic: str
+    :return: A tuple containing the MQTT topic for the Home Assistant discovery configuration, 
+        and a JSON-formatted string representing the configuration data.
+    :rtype: tuple(str, str)
+    """
     # Instead of daly_bms should be here added a proper name (unique), like serial or something
     # At this point it can be used only one daly_bms system with hass discovery
 
@@ -228,30 +278,446 @@ sample_desc = {
         "unit_of_measurement": "s",
         "precision": 0,
         "icon": "clock"},
+    "bms/alarm": {
+        "field": "alarm",
+        "device_class": None,
+        "state_class": None,
+        "unit_of_measurement": "",
+        "precision": 0},
     "meter/sample_count": {
         "field": "num_samples",
         "device_class": None,
         "state_class": "measurement",
         "unit_of_measurement": "N",
         "icon": "counter"},
+    "bms/temperature_min": {
+        "field": "temp_min",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "unit_of_measurement": "°C",
+        "icon": "thermometer"},
+    "bms/temperature_moyenne": {
+        "field": "temp_moyenne",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "unit_of_measurement": "°C",
+        "icon": "thermometer"},
+    "bms/temperature_max": {
+        "field": "temp_max",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "unit_of_measurement": "°C",
+        "icon": "thermometer"},
+}
+sample_setting_desc = {
+    "setting/vol_smart_sleep": {
+        "field": "vol_smart_sleep",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "unit_of_measurement": "V",
+        "precision": 3,
+        "accuracy_decimals": 2
+    },
+    "setting/vol_cell_uv": {
+        "field": "vol_cell_uv",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "unit_of_measurement": "V",
+        "precision": 3,
+        "accuracy_decimals": 2
+    },
+    "setting/vol_cell_uvpr": {
+        "field": "vol_cell_uvpr",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "unit_of_measurement": "V",
+        "precision": 3,
+        "accuracy_decimals": 2
+    },
+    "setting/vol_cell_ov": {
+        "field": "vol_cell_ov",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "unit_of_measurement": "V",
+        "precision": 3,
+        "accuracy_decimals": 2
+    },
+    "setting/vol_cell_ovpr": {
+        "field": "vol_cell_ovpr",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "unit_of_measurement": "V",
+        "precision": 3,
+        "accuracy_decimals": 2
+    },
+    "setting/vol_balan_trig": {
+        "field": "vol_balan_trig",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "unit_of_measurement": "V",
+        "precision": 3,
+        "accuracy_decimals": 2
+    },
+    "setting/vol_soc_full": {
+        "field": "vol_soc_full",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "unit_of_measurement": "V",
+        "precision": 3,
+        "accuracy_decimals": 2
+    },
+    "setting/vol_soc_empty": {
+        "field": "vol_soc_empty",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "unit_of_measurement": "V",
+        "precision": 3,
+        "accuracy_decimals": 2
+    },
+    "setting/vol_rcv": {
+        "field": "vol_rcv",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "unit_of_measurement": "V",
+        "precision": 3,
+        "accuracy_decimals": 2
+    },
+    "setting/vol_rfv": {
+        "field": "vol_rfv",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "unit_of_measurement": "V",
+        "precision": 3,
+        "accuracy_decimals": 2
+    },
+    "setting/vol_sys_pwr_off": {
+        "field": "vol_sys_pwr_off",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "unit_of_measurement": "V",
+        "precision": 3,
+        "accuracy_decimals": 2
+    },
+
+    "setting/cell_count": {
+        "field": "cell_count",
+        "device_class": None,
+        "state_class": "measurement",
+        "unit_of_measurement": "N",
+        "icon": "counter"},
+    "setting/capacity": {
+        "field": "capacity",
+        "device_class": None,
+        "state_class": None,
+        "unit_of_measurement": "Ah"
+    },
+    "setting/max_battery_charge_current": {
+        "field": "max_battery_charge_current",
+        "device_class": "current",
+        "state_class": "measurement",
+        "unit_of_measurement": "A",
+        "precision": 2,
+        "accuracy_decimals": 2
+    },
+    "setting/max_battery_discharge_current": {
+        "field": "max_battery_discharge_current",
+        "device_class": "current",
+        "state_class": "measurement",
+        "unit_of_measurement": "A",
+        "precision": 2,
+        "accuracy_decimals": 2
+    },
+    "setting/cur_balan_max": {
+        "field": "cur_balan_max",
+        "device_class": "current",
+        "state_class": "measurement",
+        "unit_of_measurement": "A",
+        "precision": 2,
+        "accuracy_decimals": 2
+    },
+    "setting/tmp_bat_cot": {
+        "field": "tmp_bat_cot",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "unit_of_measurement": "°C",
+        "precision": 1,
+        "accuracy_decimals": 1
+    },
+    "setting/tmp_bat_cotpr": {
+        "field": "tmp_bat_cotpr",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "unit_of_measurement": "°C",
+        "precision": 1,
+        "accuracy_decimals": 1
+    },
+    "setting/tmp_bat_dc_ot": {
+        "field": "tmp_bat_dc_ot",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "unit_of_measurement": "°C",
+        "precision": 1,
+        "accuracy_decimals": 1
+    },
+    "setting/tmp_bat_dc_otpr": {
+        "field": "tmp_bat_dc_otpr",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "unit_of_measurement": "°C",
+        "precision": 1,
+        "accuracy_decimals": 1
+    },
+    "setting/tmp_bat_cut": {
+        "field": "tmp_bat_cut",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "unit_of_measurement": "°C",
+        "precision": 1,
+        "accuracy_decimals": 1
+    },
+    "setting/tmp_bat_cutpr": {
+        "field": "tmp_bat_cutpr",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "unit_of_measurement": "°C",
+        "precision": 1,
+        "accuracy_decimals": 1
+    },
+    "setting/tmp_mos_ot": {
+        "field": "tmp_mos_ot",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "unit_of_measurement": "°C",
+        "precision": 1,
+        "accuracy_decimals": 1
+    },
+    "setting/tmp_mos_otpr": {
+        "field": "tmp_mos_otpr",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "unit_of_measurement": "°C",
+        "precision": 1,
+        "accuracy_decimals": 1
+    },
+    "setting/tim_bat_cocp_dly": {
+        "field": "tim_bat_cocp_dly",
+        "device_class": "duration",
+        "state_class": "measurement",
+        "unit_of_measurement": "s",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "setting/tim_bat_cocpr_dly": {
+        "field": "tim_bat_cocpr_dly",
+        "device_class": "duration",
+        "state_class": "measurement",
+        "unit_of_measurement": "s",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "setting/tim_bat_dc_ocp_dly": {
+        "field": "tim_bat_dc_ocp_dly",
+        "device_class": "duration",
+        "state_class": "measurement",
+        "unit_of_measurement": "s",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "setting/tim_bat_dc_ocpr_dly": {
+        "field": "tim_bat_dc_ocpr_dly",
+        "device_class": "duration",
+        "state_class": "measurement",
+        "unit_of_measurement": "s",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "setting/tim_bat_scpr_dly": {
+        "field": "tim_bat_scpr_dly",
+        "device_class": "duration",
+        "state_class": "measurement",
+        "unit_of_measurement": "s",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "setting/scp_delay": {
+        "field": "scp_delay",
+        "device_class": "duration",
+        "state_class": "measurement",
+        "unit_of_measurement": "s",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "setting/start_bal_vol": {
+        "field": "start_bal_vol",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "unit_of_measurement": "V",
+        "precision": 3,
+        "accuracy_decimals": 2
+    }
 }
 
+alarm_desc = {
+    "alarm/low_soc": {
+        "field": "low_soc",
+        "device_class": "problem",
+        "state_class": "measurement",
+        "unit_of_measurement": "",
+        "entity_category": "diagnostic",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "alarm/high_internal_temperature": {
+        "field": "high_internal_temperature",
+        "device_class": "problem",
+        "state_class": "measurement",
+        "unit_of_measurement": "",
+        "entity_category": "diagnostic",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "alarm/high_voltage": {
+        "field": "high_voltage",
+        "device_class": "problem",
+        "state_class": "measurement",
+        "unit_of_measurement": "",
+        "entity_category": "diagnostic",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "alarm/low_voltage": {
+        "field": "low_voltage",
+        "device_class": "problem",
+        "state_class": "measurement",
+        "unit_of_measurement": "",
+        "entity_category": "diagnostic",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "alarm/high_charge_current": {
+        "field": "high_charge_current",
+        "device_class": "problem",
+        "state_class": "measurement",
+        "unit_of_measurement": "",
+        "entity_category": "diagnostic",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "alarm/high_discharge_current": {
+        "field": "high_discharge_current",
+        "device_class": "problem",
+        "state_class": "measurement",
+        "unit_of_measurement": "",
+        "entity_category": "diagnostic",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "alarm/high_cell_voltage": {
+        "field": "high_cell_voltage",
+        "device_class": "problem",
+        "state_class": "measurement",
+        "unit_of_measurement": "",
+        "entity_category": "diagnostic",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "alarm/low_cell_voltage": {
+        "field": "low_cell_voltage",
+        "device_class": "problem",
+        "state_class": "measurement",
+        "unit_of_measurement": "",
+        "entity_category": "diagnostic",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "alarm/high_charge_temperature": {
+        "field": "high_charge_temperature",
+        "device_class": "problem",
+        "state_class": "measurement",
+        "unit_of_measurement": "",
+        "entity_category": "diagnostic",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "alarm/low_charge_temperature": {
+        "field": "low_charge_temperature",
+        "device_class": "problem",
+        "state_class": "measurement",
+        "unit_of_measurement": "",
+        "entity_category": "diagnostic",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+    "alarm/high_temperature": {
+        "field": "high_temperature",
+        "device_class": "problem",
+        "state_class": "measurement",
+        "unit_of_measurement": "",
+        "entity_category": "diagnostic",
+        "precision": 0,
+        "accuracy_decimals": 0
+    },
+}
 
-def publish_sample(client, device_topic, sample: BmsSample):
-    for k, v in sample_desc.items():
+def publish_sample_with_desc(client, device_topic, desc, sample):
+    """
+    Publishes a sample with a detailed description to the specified device topic.
+
+    The method iterates over the provided description dictionary and constructs
+    a topic for each key by appending it to the base device topic. The sample
+    is processed and rounded according to the precision specified in the
+    description. Non-NaN and non-None values are then sent to the MQTT broker
+    via a single outgoing message.
+
+    :param client: The MQTT client instance used for publishing messages.
+    :param device_topic: The base topic name for the device.
+    :param desc: A dictionary containing key-value pairs specifying the details
+        for publishing. Each key maps to a dictionary that must include the
+        sample field to extract (indicated by 'field') and optionally the
+        rounding precision (indicated by 'precision').
+    :param sample: The sample object containing the data to be published.
+    :return: None
+    """
+    for k, v in desc.items():
         topic = f"{device_topic}/{k}"
         s = round_to_n(getattr(sample, v['field']), v.get('precision', 5))
         logger.debug("publish_sample %s: %s", topic, f"{s}")
         if not is_none_or_nan(s):
             mqtt_single_out(client, topic, s)
 
-    if sample.switches:
-        for switch_name, switch_state in sample.switches.items():
+def publish_sample(client, device_topic, sample: BmsSample):
+    """
+    Publishes a BmsSample object to an MQTT client along with its switches and settings.
+
+    This function handles publishing the provided `BmsSample` object to a specified
+    MQTT client and topic. It publishes the sample description, switch states, and 
+    settings as applicable.
+
+    :param client: The MQTT client to publish messages to.
+    :type client: MQTT client object
+    :param device_topic: The base topic for the MQTT device.
+    :type device_topic: str
+    :param sample: The `BmsSample` object containing the data to be published.
+    :type sample: BmsSample
+    :return: None
+    """
+    publish_sample_with_desc(client, device_topic, sample_desc, sample)
+    setting = sample.setting
+    switch_states = sample.switches
+    if setting:
+        publish_sample_with_desc(client, device_topic, sample_setting_desc, setting)
+        if not switch_states:
+            switch_states= setting.switches
+
+    if switch_states:
+        for switch_name, switch_state in switch_states.items():
             assert isinstance(switch_state, bool)
             topic = f"{device_topic}/switch/{switch_name}"
             logger.debug("publish_sample %s: %s", topic, f"{switch_state}")
             mqtt_single_out(client, topic, 'ON' if switch_state else 'OFF')
-
+    protection = sample.protection
+    if protection:
+        publish_sample_with_desc(client, device_topic, alarm_desc, protection)
 
 def publish_cell_voltages(client, device_topic, voltages, publish_index, bms_name):
     # "highest_voltage": parts[0] / 1000,
@@ -327,10 +793,24 @@ def publish_hass_discovery(client, device_topic, expire_after_seconds: int, samp
         remove_none_values(dm['device'])
         discovery_msg[f"homeassistant/sensor/{device_topic}/_{k.replace('/', '_')}/config"] = dm
 
-    for k, d in sample_desc.items():
-        if not is_none_or_nan(getattr(sample, d["field"])):
-            _hass_discovery(k, d["device_class"], state_class=d["state_class"], unit=d["unit_of_measurement"],
-                            icon=d.get('icon', None), name=d["field"], precision_value=d.get('precision', None))
+    def publish_hass_discovery_with_desc(desc, setting):
+        for k, d in desc.items():
+            if not is_none_or_nan(getattr(setting, d["field"])):
+                _hass_discovery(k, d["device_class"], state_class=d["state_class"], unit=d["unit_of_measurement"],
+                                icon=d.get('icon', None), name=d["field"], precision_value=d.get('precision', None))
+
+    publish_hass_discovery_with_desc(sample_desc, sample)
+
+    switch_states = sample.switches
+    setting = sample.setting
+    if setting:
+        publish_hass_discovery_with_desc(sample_setting_desc, setting)
+        if not switch_states:
+            switch_states= setting.switches
+    
+    protection = sample.protection
+    if protection:
+        publish_hass_discovery_with_desc(alarm_desc, protection)
 
     for i in range(0, num_cells):
         k = 'cell_voltages/%d' % (i + 1)
@@ -366,7 +846,7 @@ def publish_hass_discovery(client, device_topic, expire_after_seconds: int, samp
     for name, m in meters.items():
         _hass_discovery('meter/%s' % name, **m, name=name.replace('_', ' ') + " meter", long_expiry=True)
 
-    switches = (sample.switches and sample.switches.keys())
+    switches = (switch_states and switch_states.keys())
     if switches:
         for switch_name in switches:
             discovery_msg[f"homeassistant/switch/{device_topic}/{switch_name}/config"] = {
@@ -395,7 +875,7 @@ def publish_hass_discovery(client, device_topic, expire_after_seconds: int, samp
         j = json.dumps(data)
         logger.debug('discovery msg %s: %s', topic, j)
         mqtt_single_out(client, topic, j)
-
+        
 
 _switch_callbacks = {}
 _message_queue = queue.Queue()
@@ -413,6 +893,22 @@ async def mqtt_process_action_queue():
 
 
 def subscribe_switches(mqtt_client: paho.Client, device_topic, bms: BtBms, switches):
+    """
+    Subscribe to MQTT topics to control switches and define callbacks for handling 
+    incoming MQTT messages. The function establishes the relationship between MQTT 
+    and switch operations on the given device.
+
+    :param mqtt_client: MQTT client responsible for broker communication
+    :type mqtt_client: paho.Client
+    :param device_topic: Base MQTT topic associated with the device
+    :type device_topic: str
+    :param bms: Battery Management System instance for controlling switches
+    :type bms: BtBms
+    :param switches: List of switch names to be subscribed to
+    :type switches: list[str]
+    :return: None
+    :rtype: None
+    """
     async def set_switch(switch_name: str, state: bool):
         assert isinstance(state, bool)
         logger.debug('Set %s %s switch %s', bms.name, switch_name, state)
@@ -429,6 +925,21 @@ def subscribe_switches(mqtt_client: paho.Client, device_topic, bms: BtBms, switc
 
 
 def mqtt_message_handler(client, userdata, message: paho.MQTTMessage):
+    """
+    Handles incoming MQTT messages, decodes the payload, and routes the payload to
+    a pre-defined callback based on the message topic. If no callback is defined
+    for the topic, a warning is logged. This function is part of an MQTT client
+    workflow.
+
+    :param client: The MQTT client instance calling this function.
+    :type client: Any
+    :param userdata: The private user data associated with the MQTT client.
+    :type userdata: Any
+    :param message: The incoming MQTT message containing topic and payload data.
+                    It must be an instance of `paho.MQTTMessage`.
+    :type message: paho.MQTTMessage
+    :return: None
+    """
     payload = message.payload.decode("utf-8")
     logger.info("received msg %s: %s", message.topic, payload)
     callback = _switch_callbacks.get(message.topic, None)
@@ -440,6 +951,19 @@ def mqtt_message_handler(client, userdata, message: paho.MQTTMessage):
 
 def paho_monkey_patch():
     def _handle_pingresp(self):
+        """
+        Handles the PINGRESP packet to ensure correct protocol behavior and logs the response.
+
+        This function processes an incoming PINGRESP MQTT control packet, verifying
+        that the packet is constructed correctly. If the packet contains an invalid
+        remaining length, a protocol error is returned. Otherwise, it logs the PINGRESP
+        packet and concludes the ping request process.
+
+        :param self: Reference to the current instance of the class invoking the method.
+        :return: MQTT error status code indicating the result of the handling
+            process (either `paho.MQTT_ERR_PROTOCOL` or `paho.MQTT_ERR_SUCCESS`).
+        :rtype: int
+        """
         if self._in_packet['remaining_length'] != 0:
             return paho.MQTT_ERR_PROTOCOL
 

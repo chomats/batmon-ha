@@ -98,13 +98,15 @@ class BtBms:
                         # "Disable `install_newer_bleak` option or run `pip3 -r requirements.txt`"
                         , bleak_version())
 
-            self._adapter = adapter
-
-            if address == 'serial':
+            if address.startswith('serial:'):
                 from bmslib.wired import SerialBleakClientWrapper
+                adapter = address[7:]
+                self._adapter = adapter
+                self.logger.info('Using serial with adapter %s', adapter)
                 assert adapter, "You need to specify a serial device (adapter)"
                 self.client = SerialBleakClientWrapper(adapter)
             else:
+                self._adapter = adapter
                 if adapter:  # hci0, hci1 (BT adapter hardware)
                     self.logger.info('Using adapter %s', adapter)
                     kwargs['adapter'] = adapter

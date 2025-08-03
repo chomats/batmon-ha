@@ -53,6 +53,7 @@ profile batmon flags=(attach_disconnected,mediate_deleted) {
     /etc/cont-finish.d/** rwix,
     /run/{,**} rwk,
     /dev/tty rw,
+    /dev/ttyUSB* rw,
 
     # Bashio
     /usr/lib/bashio/** ix,

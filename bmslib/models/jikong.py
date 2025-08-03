@@ -23,15 +23,11 @@ from typing import List, Callable, Dict, Tuple
 
 from bmslib.bms import BmsSample, DeviceInfo
 from bmslib.bt import BtBms
+from bmslib.serialbattery.jkserialio import s_decode_sample, decode_info
 from bmslib.util import to_hex_str
-
 
 def calc_crc(message_bytes):
     return sum(message_bytes) & 0xFF
-
-
-def read_str(buf, offset, encoding='utf-8'):
-    return buf[offset:buf.index(0x00, offset)].decode(encoding=encoding)
 
 
 def _jk_command(address, value: list = ()):
@@ -182,73 +178,14 @@ class JKBt(BtBms):
         # https://github.com/jblance/mpp-solar/blob/master/mppsolar/protocols/jkabstractprotocol.py
         # https://github.com/syssi/esphome-jk-bms/blob/main/components/jk_bms_ble/jk_bms_ble.cpp#L1152
         buf, _ = self._resp_table[0x03]
-        psk = read_str(buf, 6 + 16 + 8 + 16 + 40 + 11)
-        if psk:
-            self.logger.info("PSK = '%s' (Note that anyone within BLE range can read this!)", psk)
-
-        di = DeviceInfo(mnf="JK",
-                        model=read_str(buf, 6),
-                        hw_version=read_str(buf, 6 + 16),
-                        sw_version=read_str(buf, 6 + 16 + 8),
-                        name=read_str(buf, 6 + 16 + 8 + 16),
-                        sn=read_str(buf, 6 + 16 + 8 + 16 + 40),
-                        )
-        self._has_float_charger = ('PB2A16S' in di.model) or ('PB1A16S' in di.model)
+        di = decode_info(buf, self.logger)
+        self._has_float_charger = di.float_charger
         return di
 
     async def has_float_charger(self):
         if self._has_float_charger is None:
             await self.fetch_device_info()
         return self._has_float_charger
-
-    def _decode_sample(self, buf: bytearray, t_buf: float, has_float_charger:bool) -> BmsSample:
-        buf_set, t_set = self._resp_table[0x01]
-
-        offset = 0
-        if self.is_new_11fw_32s is None:
-            self.is_new_11fw_32s = True
-
-        if self.is_new_11fw_32s:
-            offset = 32
-            self.logger.debug('New 11.x firmware, offset=%s', offset)
-
-        i16 = lambda i: int.from_bytes(buf[i:(i + 2)], byteorder='little', signed=True)
-        u32 = lambda i: int.from_bytes(buf[i:(i + 4)], byteorder='little', signed=False)
-        f32u = lambda i: u32(i) * 1e-3
-        f32s = lambda i: int.from_bytes(buf[i:(i + 4)], byteorder='little', signed=True) * 1e-3
-
-        temp = lambda x: float('nan') if x == -2000 else (x / 10)
-
-        temperatures = [temp(i16(130 + offset)), temp(i16(132 + offset))]
-        if self.is_new_11fw_32s:
-            temperatures += [temp(i16(224 + offset)), temp(i16(226 + offset))]
-
-        return BmsSample(
-            voltage=f32u(118 + offset),
-            current=-f32s(126 + offset),
-            soc=buf[141 + offset],
-
-            cycle_capacity=f32u(154 + offset),  # total charge TODO rename cycle charge
-            capacity=f32u(146 + offset),  # computed capacity (starts at self.capacity, which is user-defined),
-            charge=f32u(142 + offset),  # "remaining capacity"
-
-            temperatures=temperatures,
-            mos_temperature=i16((112 if self.is_new_11fw_32s else 134) + offset) / 10,
-            balance_current=i16(138 + offset) / 1000,
-
-            # 146 charge_full (see above)
-            num_cycles=u32(150 + offset),
-            switches=dict(
-                charge=bool(buf_set[118]),
-                discharge=bool(buf_set[122]),
-                balance=bool(buf_set[126]),
-                **(dict(float_charge=bool(buf_set[283] & 2)) if has_float_charger else {}),
-            ),
-            #  #buf[166 + offset]),  charge FET state
-            # buf[167 + offset]), discharge FET state
-            uptime=float(u32(162 + offset)),  # seconds
-            timestamp=t_buf,
-        )
 
     async def fetch(self, wait=True) -> BmsSample:
 
@@ -277,8 +214,13 @@ class JKBt(BtBms):
                 self.logger.info("Unrecognized SW version %s", di)
 
         buf, t_buf = self._resp_table[0x02]
+        buf_set, t_set = self._resp_table[0x02]
         has_float_charger = await self.has_float_charger()
-        return self._decode_sample(buf, t_buf, has_float_charger=has_float_charger)
+        return s_decode_sample(is_new_11fw_32s=self.is_new_11fw_32s, 
+                              logger=self.logger, 
+                              num_cells=self.num_cells,
+                              buf_set=buf_set,
+                              buf=buf, t_buf=t_buf, has_float_charger=has_float_charger)
 
     async def subscribe(self, callback: Callable[[BmsSample], None]):
         self._callbacks[0x02].append(lambda buf: callback(self._decode_sample(buf, t_buf=time.time())))
@@ -293,6 +235,11 @@ class JKBt(BtBms):
         voltages = [int.from_bytes(buf[(6 + i * 2):(6 + i * 2 + 2)], byteorder='little') for i in
                     range(self.num_cells)]
         return voltages
+    
+    async def connect_if_needed(self):
+        if not self.is_connected:
+            await self.connect(40)
+            await asyncio.sleep(.2)
 
     async def set_switch(self, switch: str, state: bool):
         # from https://github.com/syssi/esphome-jk-bms/blob/4079c22eaa40786ffa0cabd45d0d98326a1fdd29/components/jk_bms_ble/switch/__init__.py
@@ -302,6 +249,7 @@ class JKBt(BtBms):
             balance=0x1F
         )
 
+        await self.connect_if_needed()
         if self.has_float_charger():
             addresses['float_charge'] = 0x30
 

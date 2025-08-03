@@ -29,6 +29,8 @@ from bmslib.bms_ble.const import (
     KEY_PROBLEM,
     KEY_TEMP_VALUE,
 )
+from bmslib.models.ant import crc16_modbus
+
 
 class BluetoothServiceInfoBleak():
     pass
@@ -313,6 +315,35 @@ class BaseBMS(metaclass=ABCMeta):
         return data
 
 
+def crc16_modbus_2(data: bytes) -> bytes:
+    crc = 0xFFFF
+    for byte in data:
+        crc ^= byte
+        for _ in range(8):
+            if crc & 1:
+                crc = (crc >> 1) ^ 0xA001
+            else:
+                crc = crc >> 1
+    high = (crc >> 8) & 0xFF
+    low = crc & 0xFF
+    return bytes([low, high])
+
+def crc16_modbus2(data: bytes) -> bytearray:
+    i = crc16_modbus(data)
+    return bytearray([i & 0xff, (i >> 8) & 0xff])
+
+def crc16_xmodem2(data):
+    crc = 0
+    for b in data:
+        crc ^= b << 8
+        for _ in range(8):
+            if crc & 0x8000:
+                crc = (crc << 1) ^ 0x1021
+            else:
+                crc <<= 1
+            crc &= 0xFFFF
+    return bytes([crc & 0xff, (crc >> 8) & 0xff])
+
 def crc_modbus(data: bytearray) -> int:
     """Calculate CRC-16-CCITT MODBUS."""
     crc: int = 0xFFFF
@@ -331,7 +362,6 @@ def crc_xmodem(data: bytearray) -> int:
         for _ in range(8):
             crc = (crc << 1) ^ 0x1021 if (crc & 0x8000) else (crc << 1)
     return crc & 0xFFFF
-
 
 def crc8(data: bytearray) -> int:
     """Calculate CRC-8/MAXIM-DOW."""

@@ -1,7 +1,7 @@
 name: "Batmon"
 description: "Monitor various BMS over bluetooth"
 url: https://github.com/fl4p/batmon-ha
-version: "1.82.3"
+version: "1.82.6"
 slug: "batmon"
 init: false
 host_dbus: true
@@ -28,9 +28,8 @@ discovery:
 
 options:
   devices:
-    - address: D6:6C:0A:61:14:30
-      type: sok
-      alias: battery1
+    - address: 1
+      name: battery1
   concurrent_sampling: false
   keep_alive: true
   verbose_log: false
@@ -44,12 +43,15 @@ options:
 schema:
   devices:
     - address: str
-      type: str
+      is_serial: "bool?"
+      name: str
+      type: "str?"
       alias: "str?"
       debug: "bool?"
       pin: "str?"
       algorithm: "str?"
       current_calibration: "float?"
+      adapter: "str?"
 
   mqtt_user: "str?"
   mqtt_password: "str?"
