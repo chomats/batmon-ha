@@ -94,12 +94,14 @@ def construct_bms(dev, verbose_log, bt_discovered_devices):
         return dev
 
     addr = name2addr(addr)
-
+    adapter = dev.get('adapter')
+    
     name: str = dev.get('alias') or dev_by_addr(addr).name
+    logger.info('Configure bms with adapter %s, addr %s, name: %s', adapter, addr, name)
 
     return bms_class(address=addr,
                      name=name,
                      verbose_log=verbose_log or dev.get('debug'),
                      psk=dev.get('pin'),
-                     adapter=dev.get('adapter'),
+                     adapter=adapter,
                      )

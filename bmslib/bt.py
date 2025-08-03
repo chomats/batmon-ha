@@ -102,6 +102,7 @@ class BtBms:
 
             if address == 'serial':
                 from bmslib.wired import SerialBleakClientWrapper
+                self.logger.info('Using serial with adapter %s', adapter)
                 assert adapter, "You need to specify a serial device (adapter)"
                 self.client = SerialBleakClientWrapper(adapter)
             else:
