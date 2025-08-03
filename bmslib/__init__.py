@@ -81,7 +81,7 @@ class FuturesPool:
             return await asyncio.wait_for(self._futures.get(name), timeout)
         except (asyncio.TimeoutError, asyncio.CancelledError):
             self.remove(name)
-            raise asyncio.TimeoutError("timeout waiting for %s" % name)
+            raise asyncio.TimeoutError("timeout %d waiting for %s" % (timeout, name))
         finally:
             self.remove(name)
 

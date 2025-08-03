@@ -184,7 +184,7 @@ class BmsSampler:
 
             bms = self.bms
             t_interact = max(self._t_wd_reset, self.bms.connect_time)
-            if bms.is_connected and time.time() - t_interact > 2 * max(MIN_VALUE_EXPIRY, self.expire_after_seconds):
+            if bms.is_connected and time.time() - t_interact > MIN_VALUE_EXPIRY:
                 logger.warning('%s disconnect because no data has been flowing for some time', bms.name)
                 await bms.disconnect()
 
