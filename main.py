@@ -15,9 +15,7 @@ import mqtt_util
 from bmslib.bms import MIN_VALUE_EXPIRY
 from bmslib.models.jikong import s_decode_sample
 from bmslib.sampling import BmsSampler
-from bmslib.serialbattery.jkserialio2 import JKSerialIO
-
-from bmslib.serialbattery.jkserialio import s_decode_O1
+from bmslib.serialbattery.jkserialio import JKSerialIO, s_decode_O1
 from bmslib.store import load_user_config
 from bmslib.util import get_logger, exit_process
 from mqtt_util import mqtt_last_publish_time, mqtt_message_handler, mqtt_process_action_queue
@@ -35,7 +33,7 @@ set_pref_config(config)
 shutdown = False
 t_last_store = 0
 
-DEV_TTY_USB_ = "/dev/ttyUSB1"
+DEV_TTY_USB_ = "/dev/ttyUSB0"
 
 bms_list: Dict[int, BmsSampler] = {}
 
