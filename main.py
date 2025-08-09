@@ -133,7 +133,7 @@ async def mon_callback(data, crc=None):
         logger.info(sample.trame_str)
         bms_sampler = bms_list.get(sample.address)
         if bms_sampler:
-            await bms_sampler.put(sample) 
+            bms_sampler.put(sample) 
     elif len(data) >= 300 and data[4] == 1:
         logger.info(be)
         logger.info(bytes_to_printable(data))
