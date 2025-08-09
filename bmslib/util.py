@@ -3,6 +3,7 @@ import os
 import random
 import string
 import time
+from logging.handlers import TimedRotatingFileHandler
 
 
 class dotdict(dict):
@@ -16,29 +17,49 @@ class dotdict(dict):
     __delattr__ = dict.__delitem__
     # __hasattr__ = dict.__contains__
 
+logger = None
 
 def get_logger(verbose=False):
+    global logger
+    if logger:
+        return logger
+    
     # log_format = '%(asctime)s %(levelname)-6s [%(filename)s:%(lineno)d] %(message)s'
-    log_format = '%(asctime)s %(levelname)s [%(module)s] %(message)s'
+    log_format = '%(asctime)s %(levelname)s %(name)s [%(module)s] %(message)s'
+    formatter = logging.Formatter(log_format)
+    log_file_name = 'batmon-ha.jkbms-app.log'
+    # set TimedRotatingFileHandler for root
+    # use very short interval for this example, typical 'when' would be 'midnight' and no explicit interval
+    handler = TimedRotatingFileHandler(log_file_name, when="H", interval=1, backupCount=10)
+    handler.setFormatter(formatter)
+    logger = logging.getLogger() # or pass string to give it a name
+    logger.addHandler(handler)
     if verbose:
         level = logging.DEBUG
     else:
         level = logging.INFO
 
-    logging.basicConfig(level=level, format=log_format, datefmt='%H:%M:%S')
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
-
+    logger.setLevel(level)
     return logger
 
+
+def get_logger_simple(verbose=False):
+    log_format = '%(asctime)s %(levelname)s [%(module)s] %(message)s'
+    if verbose:
+        level = logging.DEBUG
+    else:
+        level = logging.INFO
+    logging.basicConfig(level=level, format=log_format, datefmt='%H:%M:%S')
+    simplelogger = logging.getLogger()
+    simplelogger.setLevel(logging.DEBUG if verbose else logging.INFO)
+    return simplelogger
 
 def dict_to_short_string(d: dict):
     return '(' + ','.join(f'{k}={v}' for k, v in d.items() if v is not None) + ')'
 
 
 def to_hex_str(data):
-    return " ".join(map(lambda b: hex(b)[2:], data))
-
+    return " ".join(f"{b:02X}" for b in data)
 
 def exit_process(is_error=True, delayed=False):
     from threading import Thread

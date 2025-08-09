@@ -28,9 +28,8 @@ discovery:
 
 options:
   devices:
-    - address: D6:6C:0A:61:14:30
-      type: sok
-      alias: battery1
+    - address: 1
+      name: battery1
   concurrent_sampling: false
   keep_alive: true
   verbose_log: false
@@ -43,8 +42,9 @@ options:
 
 schema:
   devices:
-    - address: str
-      type: str
+    - address: int
+      name: str
+      type: "str?"
       alias: "str?"
       debug: "bool?"
       pin: "str?"
