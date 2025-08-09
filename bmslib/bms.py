@@ -37,9 +37,22 @@ class BmsSample:
                  num_cycles=math.nan, soc=math.nan,
                  balance_current=math.nan,
                  temperatures: List[float] = None,
-                 mos_temperature: float = math.nan,
+                 voltages: List[float] = None,
+                 resistances: List[float] = None,
+                 mos_temperature: float = math.nan, 
+                 temp_status_flag: list[bool] = None,
                  switches: Optional[Dict[str, bool]] = None,
-                 uptime=math.nan, timestamp: Optional[float] = None):
+                 uptime=math.nan, timestamp: Optional[float] = None,
+                 ad=None,
+                 minimum_voltage_cell_index=None,
+                 maximum_voltage_cell_index=None,
+                 maximum_voltage_difference=None,
+                 cell_average_voltage=None,
+                 battery_status=None,
+                 alarm=None,
+                 balance_line_resistance_status=None,
+                 balance_state=None,
+                 trame_str=None,):
         """
 
         :param voltage:
@@ -55,6 +68,7 @@ class BmsSample:
         :param uptime: BMS uptime in seconds
         :param timestamp: seconds since epoch (unix timestamp from time.time())
         """
+        self.address = ad
         self.voltage: float = voltage
         self.current: float = current or 0  # -
         self._power = power  # 0 -> +0
@@ -78,8 +92,19 @@ class BmsSample:
         self.switches = switches
         self.uptime = uptime
         self.timestamp = timestamp or time.time()
-
+        self.voltages = voltages
+        self.resistances = resistances
+        self.temp_status_flag = temp_status_flag
+        self.minimum_voltage_cell_index = minimum_voltage_cell_index
+        self.maximum_voltage_cell_index = maximum_voltage_cell_index
+        self.maximum_voltage_difference = maximum_voltage_difference
+        self.cell_average_voltage = cell_average_voltage
+        self.battery_status = battery_status
         self.num_samples = 0
+        self.alarm = alarm
+        self.balance_line_resistance_status = balance_line_resistance_status
+        self.balance_state = balance_state
+        self.trame_str = trame_str
 
         if switches:
             assert all(map(lambda x: isinstance(x, bool), switches.values())), "non-bool switches values %s" % switches
@@ -97,12 +122,19 @@ class BmsSample:
     def __str__(self):
         # noinspection PyStringFormat
         s = 'BmsSampl('
+        s += 'ad=%s, ' % self.address
         if not math.isnan(self.soc):
             s += '%.1f%%,' % self.soc
         vals = self.values()
-        s += 'U=%(voltage).1fV,I=%(current).2fA,P=%(power).0fW,' % vals
+        s += ', U=%(voltage).1fV,I=%(current).2fA,P=%(power).0fW,' % vals
         if not math.isnan(self.charge):
-            s += 'Q=%(charge).0f/%(capacity).0fAh,mos=%(mos_temperature).0f°C' % vals
+            s += 'Q=%(charge).0f/' % vals
+        s += 'capacity=%(capacity).0fAh,mos=%(mos_temperature).0f°C' % vals
+        s += 'maximum_voltage_difference= %(maximum_voltage_difference).0fV,cell_average_voltage=%(cell_average_voltage).0fV' % vals
+        if self.temperatures:
+            s+=',temp=[%s]' % ','.join(map(str, self.temperatures))
+        if self.voltages:
+            s+=',V=[%s]' % ','.join(map(str, self.voltages))
         return s.rstrip(',') + ')'
 
     def invert_current(self):

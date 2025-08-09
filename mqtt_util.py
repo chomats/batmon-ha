@@ -228,6 +228,12 @@ sample_desc = {
         "unit_of_measurement": "s",
         "precision": 0,
         "icon": "clock"},
+    "bms/alarm": {
+        "field": "alarm",
+        "device_class": None,
+        "state_class": None,
+        "unit_of_measurement": "",
+        "precision": 0},
     "meter/sample_count": {
         "field": "num_samples",
         "device_class": None,

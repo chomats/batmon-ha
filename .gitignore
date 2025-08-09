@@ -13,3 +13,4 @@ tools/impedance/influxdb_*.json
 user_id
 
 *.pickle
+/config.ini
