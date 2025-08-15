@@ -42,7 +42,8 @@ options:
 
 schema:
   devices:
-    - address: int
+    - address: str
+      is_serial: "bool?"
       name: str
       type: "str?"
       alias: "str?"

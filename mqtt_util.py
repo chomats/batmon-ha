@@ -400,7 +400,7 @@ sample_setting_desc = {
     },
 
     "setting/cell_count": {
-        "field": "num_samples",
+        "field": "cell_count",
         "device_class": None,
         "state_class": "measurement",
         "unit_of_measurement": "N",
@@ -562,6 +562,7 @@ alarm_desc = {
         "field": "low_soc",
         "device_class": "problem",
         "state_class": "measurement",
+        "unit_of_measurement": "",
         "entity_category": "diagnostic",
         "precision": 0,
         "accuracy_decimals": 0
@@ -570,6 +571,7 @@ alarm_desc = {
         "field": "high_internal_temperature",
         "device_class": "problem",
         "state_class": "measurement",
+        "unit_of_measurement": "",
         "entity_category": "diagnostic",
         "precision": 0,
         "accuracy_decimals": 0
@@ -578,6 +580,7 @@ alarm_desc = {
         "field": "high_voltage",
         "device_class": "problem",
         "state_class": "measurement",
+        "unit_of_measurement": "",
         "entity_category": "diagnostic",
         "precision": 0,
         "accuracy_decimals": 0
@@ -586,6 +589,7 @@ alarm_desc = {
         "field": "low_voltage",
         "device_class": "problem",
         "state_class": "measurement",
+        "unit_of_measurement": "",
         "entity_category": "diagnostic",
         "precision": 0,
         "accuracy_decimals": 0
@@ -594,6 +598,7 @@ alarm_desc = {
         "field": "high_charge_current",
         "device_class": "problem",
         "state_class": "measurement",
+        "unit_of_measurement": "",
         "entity_category": "diagnostic",
         "precision": 0,
         "accuracy_decimals": 0
@@ -602,6 +607,7 @@ alarm_desc = {
         "field": "high_discharge_current",
         "device_class": "problem",
         "state_class": "measurement",
+        "unit_of_measurement": "",
         "entity_category": "diagnostic",
         "precision": 0,
         "accuracy_decimals": 0
@@ -610,6 +616,7 @@ alarm_desc = {
         "field": "high_cell_voltage",
         "device_class": "problem",
         "state_class": "measurement",
+        "unit_of_measurement": "",
         "entity_category": "diagnostic",
         "precision": 0,
         "accuracy_decimals": 0
@@ -618,6 +625,7 @@ alarm_desc = {
         "field": "low_cell_voltage",
         "device_class": "problem",
         "state_class": "measurement",
+        "unit_of_measurement": "",
         "entity_category": "diagnostic",
         "precision": 0,
         "accuracy_decimals": 0
@@ -626,6 +634,7 @@ alarm_desc = {
         "field": "high_charge_temperature",
         "device_class": "problem",
         "state_class": "measurement",
+        "unit_of_measurement": "",
         "entity_category": "diagnostic",
         "precision": 0,
         "accuracy_decimals": 0
@@ -634,6 +643,7 @@ alarm_desc = {
         "field": "low_charge_temperature",
         "device_class": "problem",
         "state_class": "measurement",
+        "unit_of_measurement": "",
         "entity_category": "diagnostic",
         "precision": 0,
         "accuracy_decimals": 0
@@ -642,6 +652,7 @@ alarm_desc = {
         "field": "high_temperature",
         "device_class": "problem",
         "state_class": "measurement",
+        "unit_of_measurement": "",
         "entity_category": "diagnostic",
         "precision": 0,
         "accuracy_decimals": 0

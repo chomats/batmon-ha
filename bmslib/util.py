@@ -42,18 +42,6 @@ def get_logger(verbose=False):
     logger.setLevel(level)
     return logger
 
-
-def get_logger_simple(verbose=False):
-    log_format = '%(asctime)s %(levelname)s [%(module)s] %(message)s'
-    if verbose:
-        level = logging.DEBUG
-    else:
-        level = logging.INFO
-    logging.basicConfig(level=level, format=log_format, datefmt='%H:%M:%S')
-    simplelogger = logging.getLogger()
-    simplelogger.setLevel(logging.DEBUG if verbose else logging.INFO)
-    return simplelogger
-
 def dict_to_short_string(d: dict):
     return '(' + ','.join(f'{k}={v}' for k, v in d.items() if v is not None) + ')'
 

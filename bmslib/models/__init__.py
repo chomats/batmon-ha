@@ -69,7 +69,7 @@ def get_bms_model_class(name):
     return bms_registry.get(name)
 
 
-def construct_bms(dev, verbose_log):
+def construct_bms(dev, verbose_log, bt_discovered_devices):
     addr: str = dev['address']
 
     if not addr or addr.startswith('#'):
@@ -84,6 +84,8 @@ def construct_bms(dev, verbose_log):
     if dev.get('debug'):
         logger.info('Verbose log for %s enabled', addr)
 
+    def name2addr(name: str):
+        return next((d.address for d in bt_discovered_devices if (d.name or "").strip() == name.strip()), name)
 
     def dev_by_addr(address: str):
         dev = next((d for d in bt_discovered_devices if d.address == address), None)
@@ -91,6 +93,7 @@ def construct_bms(dev, verbose_log):
             raise Exception("Can't resolve device name %s, not discovered" % address)
         return dev
 
+    addr = name2addr(addr)
     adapter = dev.get('adapter')
     
     name: str = dev.get('alias') or dev_by_addr(addr).name

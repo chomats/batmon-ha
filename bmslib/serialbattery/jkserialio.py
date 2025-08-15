@@ -7,7 +7,6 @@ import serial
 from mqtt_util import is_none_or_nan
 from ..bms import BmsSample, SettingsData
 from ..bms_ble.plugins.basebms import crc16_modbus2
-from ..models.ant import crc16_modbus
 from ..util import get_logger, to_hex_str
 
 logger = get_logger().getChild("JKSerialIO")
