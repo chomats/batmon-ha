@@ -5,16 +5,18 @@ trap call_exit 9
 
 restart()
 {
-  echo "Restart $batJkbmsPid"
-  kill -2 "$batJkbmsPid"
+  subPid=$(ps -ef | grep 'python3 main.py --master --skip-discovery' | grep -v grep | tr -s ' ' | cut -d ' ' -f2)
+  echo "Restart $subPid"
+  kill -2 "$subPid"
 }
 
 call_exit()
 {
-  echo "Exist $batJkbmsPid"
-  kill -2 "$batJkbmsPid"
+  subPid=$(ps -ef | grep 'python3 main.py --master --skip-discovery' | grep -v grep | tr -s ' ' | cut -d ' ' -f2)
+  echo "Exist $subPid"
+  kill -2 "$subPid"
   sleep 1
-  kill -9 "$batJkbmsPid"
+  kill -9 "$subPid"
   exit 
 }
 

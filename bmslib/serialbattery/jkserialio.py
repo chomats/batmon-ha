@@ -121,7 +121,7 @@ class JKSerialIO:
                         logger.debug(f"BMS data length {length}")
                         response_line = None
                         no_data_counter = 0
-                        while no_data_counter < 5:  # Try up to 5 times with no new data before exiting
+                        while no_data_counter < 20:  # Try up to 20 times with no new data before exiting wait 0.2
                             if bms.in_waiting > 0:
                                 if response_line is None:
                                     response_line = bytearray()
@@ -146,17 +146,22 @@ class JKSerialIO:
                         crc = sum(trame1[:-1]) & 0xFF
                         trame2 = data[300:]
                         logger.debug(f"trame1 {to_hex_str(data)}")
-    
+
+                        t_current = time.time_ns() - t_now
+                        
                         if crc != trame1[-1] & 0xFF:
                             logger.error(f"CRC error in trame1 {crc:02X} != {trame1[-1]:02X}")
+                            logger.error(f"Read trame in {t_current}")
+                            logger.error(f"trame {to_hex_str(data)}")
                             return False
     
                         crc_cmd = crc16_modbus2(trame2[:-2])
                         if crc_cmd != trame2[-2:]:
                             logger.error(f"CRC error in trame2 {crc_cmd[0]:02X} {crc_cmd[1]:02X} != {trame2[-2]:02X} {trame2[-1]:02X}")
+                            logger.error(f"Read trame in {t_current}")
+                            logger.error(f"trame {to_hex_str(data)}")
                             return False
 
-                        t_current = time.time_ns() - t_now
                         logger.debug(f"Read trame in {t_current}")
                         await callback(data)
                         return True
