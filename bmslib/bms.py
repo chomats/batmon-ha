@@ -142,6 +142,7 @@ class SettingsData:
                  capacity: float, scp_delay: int,
                  start_bal_vol: float,
                  status_282: int,
+                 tim_prodischarge: float,
                  switches: Dict[str, bool]):
         self.address = address
         self.vol_smart_sleep = vol_smart_sleep
@@ -162,6 +163,7 @@ class SettingsData:
         self.tim_bat_dc_ocp_dly = tim_bat_dc_ocp_dly
         self.tim_bat_dc_ocpr_dly = tim_bat_dc_ocpr_dly
         self.tim_bat_scpr_dly = tim_bat_scpr_dly
+        self.tim_prodischarge = tim_prodischarge
         self.cur_balan_max = cur_balan_max
         self.tmp_bat_cot = tmp_bat_cot
         self.tmp_bat_cotpr = tmp_bat_cotpr
@@ -227,6 +229,7 @@ class SettingsData:
     capacity: float
     scp_delay: int
     start_bal_vol: float
+    tim_prodischarge: float
     switches: Dict[str, bool]
 
 

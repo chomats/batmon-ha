@@ -819,7 +819,90 @@ def s_decode_sample(is_new_11fw_32s, logger,
         uptime=float(u32(162 + offset)),  # seconds
         timestamp=t_buf,
     )
-
+# Register Map
+# Start address code offset Index Data type Length R/W Data content Content           Unit Note Note
+# Address
+# Field HEX DEC Type Length               Unit
+# 0x1000  0x0000  0   UINT32  4   RW  Entering sleep voltage                              VolSmartSleep       mV
+#         0x0004  4   UINT32  4   RW  Cell undervoltage protection                        VolCellUV           mV
+#         0x0008  8   UINT32  4   RW  Cell undervoltage protection recovery               VolCellUVPR         mV
+#         0x000C  12  UINT32  4   RW  Cell overcharge protection                          VolCellOV           mV
+#         0x0010  16  UINT32  4   RW  Cell overcharge protection recovery voltage         VolCellOVPR         mV
+#         0x0014  20  UINT32  4   RW  Trigger balanced voltage difference                 VolBalanTrig        mV
+#         0x0018  24  UINT32  4   RW  SOC-100% voltage                                    VolSOC100%          mV
+#         0x001C  28  UINT32  4   RW  SOC-0% voltage                                      VolSOC0%            mV
+#         0x0020  32  UINT32  4   RW  Recommended charging voltage                        VolCellRCV          mV
+#         0x0024  36  UINT32  4   RW  Float charge voltage                                VolCellRFV          mV
+#         0x0028  40  UINT32  4   RW  Automatic shutdown voltage                          VolSysPwrOff        mV
+#         0x002C  44  UINT32  4   RW  Continuous charging current                         CurBatCOC           mA
+#         0x0030  48  UINT32  4   RW  Charge overcurrent protection delay                 TIMBatCOCPDly       S
+#         0x0034  52  UINT32  4   RW  Charge overcurrent protection release               TIMBatCOCPRDly      S
+#         0x0038  56  UINT32  4   RW  Continuous discharge current                        CurBatDcOC          mA
+#         0x003C  60  UINT32  4   RW  Discharge overcurrent protection delay              TIMBatDcOCPDly      S
+#         0x0040  64  UINT32  4   RW  Discharge overcurrent protection release            TIMBatDcOCPRDly     S
+#         0x0044  68  UINT32  4   RW  Short circuit protection release                    TIMBatSCPRDly       S
+#         0x0048  72  UINT32  4   RW  Maximum balancing current                           CurBalanMax         mA
+#         0x004C  76  INT32   4   RW  Charging over-temperature protection                TMPBatCOT           0.1°C
+#         0x0050  80  INT32   4   RW  Charge over temperature recovery                    TMPBatCOTPR         0.1°C
+#         0x0054  84  INT32   4   RW  Discharge over temperature protection               TMPBatDcOT          0.1°C
+#         0x0058  88  INT32   4   RW  Discharge over temperature recovery                 TMPBatDcOTPR        0.1°C
+#         0x005C  92  INT32   4   RW  Charging low temperature protection                 TMPBatCUT           0.1°C
+#         0x0060  96  INT32   4   RW  Charging low temperature recovery                   TMPBatCUTPR         0.1°C
+#         0x0064  100 INT32   4   RW  MOS over temperature protection                     TMPMosOT            0.1°C
+#         0x0068  104 INT32   4   RW  MOS over temperature protection recovery            TMPMosOTPR          0.1°C
+#         0x006C  108 UINT32  4   RW  CellCount                                           CellCount           string
+#         0x0070  112 UINT32  4   RW  Charging switch                                     BatChargeEN             1: open; 0: close
+#         0x0074  116 UINT32  4   RW  Discharge switch                                    BatDisChargeEN          1: open; 0: close
+#         0x0078  120 UINT32  4   RW  Balance switch                                      BalanEN                 1: open; 0: close
+#         0x007C  124 UINT32  4   RW  Battery design capacity                             CapBatCell          mAH
+#         0x0080  128 UINT32  4   RW  Short circuit protection delay                      SCPDelay            us
+#         0x0084  132 UINT32  4   RW  Balanced start voltage                              VolStartBalan       mV
+#         0x0088  136 UINT32  4   RW  Connection line internal resistance 0               CellConWireRes0     uΩ
+#         0x008C  140 UINT32  4   RW  Connection line internal resistance 1               CellConWireRes1     uΩ
+#         0x0090  144 UINT32  4   RW  Connection line internal resistance 2               CellConWireRes2     uΩ
+#         0x0094  148 UINT32  4   RW  Connection line internal resistance 3               CellConWireRes3     uΩ
+#         0x0098  152 UINT32  4   RW  Connection line internal resistance 4               CellConWireRes4     uΩ
+#         0x009C  156 UINT32  4   RW  Connection line internal resistance 5               CellConWireRes5     uΩ
+#         0x00A0  160 UINT32  4   RW  Connection line internal resistance 6               CellConWireRes6     uΩ
+#         0x00A4  164 UINT32  4   RW  Connection line internal resistance 7               CellConWireRes7     uΩ
+#         0x00A8  168 UINT32  4   RW  Connection line internal resistance 8               CellConWireRes8     uΩ
+#         0x00AC  172 UINT32  4   RW  Connection line internal resistance 9               CellConWireRes9     uΩ
+#         0x00B0  176 UINT32  4   RW  Connection line internal resistance 10              CellConWireRes10    uΩ
+#         0x00B4  180 UINT32  4   RW  Connection line internal resistance 11              CellConWireRes11    uΩ
+#         0x00B8  184 UINT32  4   RW  Connection line internal resistance 12              CellConWireRes12    uΩ
+#         0x00BC  188 UINT32  4   RW  Connection line internal resistance 13              CellConWireRes13    uΩ
+#         0x00C0  192 UINT32  4   RW  Connection line internal resistance 14              CellConWireRes14    uΩ
+#         0x00C4  196 UINT32  4   RW  Connection line internal resistance 15              CellConWireRes15    uΩ
+#         0x00C8  200 UINT32  4   RW  Connection line internal resistance 16              CellConWireRes16    uΩ
+#         0x00CC  204 UINT32  4   RW  Connection line internal resistance 17              CellConWireRes17    uΩ
+#         0x00D0  208 UINT32  4   RW  Connection line internal resistance 18              CellConWireRes18    uΩ
+#         0x00D4  212 UINT32  4   RW  Connection line internal resistance 19              CellConWireRes19    uΩ
+#         0x00D8  216 UINT32  4   RW  Connection line internal resistance 20              CellConWireRes20    uΩ
+#         0x00DC  220 UINT32  4   RW  Connection line internal resistance 21              CellConWireRes21    uΩ
+#         0x00E0  224 UINT32  4   RW  Connection line internal resistance 22              CellConWireRes22    uΩ
+#         0x00E4  228 UINT32  4   RW  Connection line internal resistance 23              CellConWireRes23    uΩ
+#         0x00E8  232 UINT32  4   RW  Connection line internal resistance 24              CellConWireRes24    uΩ
+#         0x00EC  236 UINT32  4   RW  Connection line internal resistance 25              CellConWireRes25    uΩ
+#         0x00F0  240 UINT32  4   RW  Connection line internal resistance 26              CellConWireRes26    uΩ
+#         0x00F4  244 UINT32  4   RW  Connection line internal resistance 27              CellConWireRes27    uΩ
+#         0x00F8  248 UINT32  4   RW  Connection line internal resistance 28              CellConWireRes28    uΩ
+#         0x00FC  252 UINT32  4   RW  Connection line internal resistance 29              CellConWireRes29    uΩ
+#         0x0100  256 UINT32  4   RW  Connection line internal resistance 30              CellConWireRes30    uΩ
+#         0x0104  260 UINT32  4   RW  Connection line internal resistance 31              CellConWireRes31    uΩ
+#         0x0108  264 UINT32  4   RW  Device address                                      DevAddr H
+#         0x010C  268 UINT32  4   RW  Discharge precharge time                            TIMProdischarge     S
+#         0x0114  276 UINT16  2   RW  Heating switch                                      HeatEN                  1: open; 0: close BIT0
+#                                 RW  Temperature sensor shield                           Disable temp-sensor     1: open; 0: close BIT1
+#                                 RW  GPS Heartbeat detection                             GPS Heartbeat           1: open; 0: close BIT2
+#                                 RW  Multiplex port function                             Port Switch             1: RS485; 0: CAN BIT3
+#                                 RW  The display is always on                            LCD Always On           1: On; 0: Off BIT4
+#                                 RW  Dedicated charger identification                    Special Charger         1: open; 0: close BIT5
+#                                 RW  Smart sleep                                         SmartSleep              1: open; 0: close BIT6
+#                                 RW  Disable parallel current limiting                   DisablePCLModule        1: open; 0: close BIT7
+#                                 RW  Data timing storage                                 TimedStoredData         1: open; 0: close BIT8
+#                                 RW  Charging floating mode                              ChargingFloatMode       1: open; 0: close BIT9
+#         0x0118  280 UINT8   2   RW  Intelligent sleep time                              TIMSmartSleep       H
+#                     UINT8       R   Data field enable control 0                         
 def s_decode_O1(status_data: bytearray) -> SettingsData:
     """
     Decodes the status data received from a device into a ``SettingsData`` object. The function extracts various 
@@ -855,15 +938,25 @@ def s_decode_O1(status_data: bytearray) -> SettingsData:
     tim_bat_dc_ocp_dly = i32(66)
     tim_bat_dc_ocpr_dly = i32(70)
     tim_bat_scpr_dly = i32(74)
-    cur_balan_max = i32(78) / 1000
-    tmp_bat_cot = u32(82) / 10
-    tmp_bat_cotpr = u32(86) / 10
-    tmp_bat_dc_ot = u32(90) / 10
-    tmp_bat_dc_otpr = u32(94) / 10
-    tmp_bat_cut = u32(98) / 10
-    tmp_bat_cutpr = u32(102) / 10
-    tmp_mos_ot = u32(106) / 10
-    tmp_mos_otpr = u32(110) / 10
+    cur_balan_max = i32(0x48 + 6) / 1000
+    #         0x0048  72  UINT32  4   RW  Maximum balancing current                           CurBalanMax         mA
+    #         0x004C  76  INT32   4   RW  Charging over-temperature protection                TMPBatCOT           0.1°C
+    #         0x0050  80  INT32   4   RW  Charge over temperature recovery                    TMPBatCOTPR         0.1°C
+    #         0x0054  84  INT32   4   RW  Discharge over temperature protection               TMPBatDcOT          0.1°C
+    #         0x0058  88  INT32   4   RW  Discharge over temperature recovery                 TMPBatDcOTPR        0.1°C
+    #         0x005C  92  INT32   4   RW  Charging low temperature protection                 TMPBatCUT           0.1°C
+    #         0x0060  96  INT32   4   RW  Charging low temperature recovery                   TMPBatCUTPR         0.1°C
+    #         0x0064  100 INT32   4   RW  MOS over temperature protection                     TMPMosOT            0.1°C
+    #         0x0068  104 INT32   4   RW  MOS over temperature protection recovery            TMPMosOTPR          0.1°C
+    #         0x006C  108 UINT32  4   RW  CellCount                                           CellCount           string
+    tmp_bat_cot = u32(0x4C + 6 ) / 10 # Charging over-temperature protection
+    tmp_bat_cotpr = i32(0x50 + 6) / 10 # Charging over-temperature recovery
+    tmp_bat_dc_ot = i32(0x54 + 6) / 10 # Discharge over temperature protection
+    tmp_bat_dc_otpr = i32(0x58 + 6) / 10 # Discharge over temperature recovery
+    tmp_bat_cut = i32(0x5C + 6) / 10 # Charging low temperature protection
+    tmp_bat_cutpr = i32(0x60 + 6) / 10 # Charging low temperature recovery
+    tmp_mos_ot = i32(0x64 + 6) / 10 # MOS over temperature protection
+    tmp_mos_otpr = i32(0x68 + 6) / 10 # MOS over temperature recovery
     cell_count = i32(114)
     bat_charge_en = i32(118)
     bat_dis_charge_en = i32(122)
@@ -877,6 +970,8 @@ def s_decode_O1(status_data: bytearray) -> SettingsData:
     discharge= bool(bat_dis_charge_en)
     balance=bool(balan_en)
     float_charge=bool(status_data[283] & 2)
+
+    tim_prodischarge = u32(274)
     
     # balancer enabled
     address = int(status_data[270])
@@ -941,6 +1036,7 @@ def s_decode_O1(status_data: bytearray) -> SettingsData:
         tim_bat_dc_ocp_dly=tim_bat_dc_ocp_dly,
         tim_bat_dc_ocpr_dly=tim_bat_dc_ocpr_dly,
         tim_bat_scpr_dly=tim_bat_scpr_dly,
+        tim_prodischarge=tim_prodischarge,
         cur_balan_max=cur_balan_max,
         tmp_bat_cot=tmp_bat_cot,
         tmp_bat_cotpr=tmp_bat_cotpr,

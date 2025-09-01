@@ -370,6 +370,7 @@ sample_setting_desc = {
         "accuracy_decimals": 2
     },
     "setting/tmp_bat_cot": {
+        "name": "Charging over-temperature protection",
         "field": "tmp_bat_cot",
         "device_class": "temperature",
         "state_class": "measurement",
@@ -378,6 +379,7 @@ sample_setting_desc = {
         "accuracy_decimals": 1
     },
     "setting/tmp_bat_cotpr": {
+        "name": "Charging over-temperature recovery",
         "field": "tmp_bat_cotpr",
         "device_class": "temperature",
         "state_class": "measurement",
@@ -386,6 +388,7 @@ sample_setting_desc = {
         "accuracy_decimals": 1
     },
     "setting/tmp_bat_dc_ot": {
+        "name": "Discharging over-temperature protection",
         "field": "tmp_bat_dc_ot",
         "device_class": "temperature",
         "state_class": "measurement",
@@ -394,6 +397,7 @@ sample_setting_desc = {
         "accuracy_decimals": 1
     },
     "setting/tmp_bat_dc_otpr": {
+        "name": "Discharging over-temperature recovery",
         "field": "tmp_bat_dc_otpr",
         "device_class": "temperature",
         "state_class": "measurement",
@@ -402,6 +406,7 @@ sample_setting_desc = {
         "accuracy_decimals": 1
     },
     "setting/tmp_bat_cut": {
+        "name": "Charging low-temperature protection",
         "field": "tmp_bat_cut",
         "device_class": "temperature",
         "state_class": "measurement",
@@ -410,6 +415,7 @@ sample_setting_desc = {
         "accuracy_decimals": 1
     },
     "setting/tmp_bat_cutpr": {
+        "name": "Charging low-temperature recovery",
         "field": "tmp_bat_cutpr",
         "device_class": "temperature",
         "state_class": "measurement",
@@ -418,6 +424,7 @@ sample_setting_desc = {
         "accuracy_decimals": 1
     },
     "setting/tmp_mos_ot": {
+        "name": "Mosfet over-temperature protection",
         "field": "tmp_mos_ot",
         "device_class": "temperature",
         "state_class": "measurement",
@@ -426,6 +433,7 @@ sample_setting_desc = {
         "accuracy_decimals": 1
     },
     "setting/tmp_mos_otpr": {
+        "name": "Mosfet over-temperature recovery",
         "field": "tmp_mos_otpr",
         "device_class": "temperature",
         "state_class": "measurement",
@@ -777,8 +785,9 @@ def publish_hass_discovery(client, device_topic, expire_after_seconds: int, samp
     def publish_hass_discovery_with_desc(desc, setting, no_name=False, type="sensor"):
         for k, d in desc.items():
             if not is_none_or_nan(getattr(setting, d["field"])):
+                device_name = d.get('name', None if no_name else d["field"])
                 _hass_discovery(k, d["device_class"], state_class=d["state_class"], unit=d["unit_of_measurement"],
-                                icon=d.get('icon', None), name=None if no_name else d["field"], precision_value=d.get('precision', None), type=type)
+                                icon=d.get('icon', None), name=device_name, precision_value=d.get('precision', None), type=type)
 
     publish_hass_discovery_with_desc(sample_desc, sample)
 
