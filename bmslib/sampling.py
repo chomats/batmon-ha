@@ -246,8 +246,8 @@ class BmsSampler(BmsSetSwitch):
             sample = sample.multiply_current(self.current_calibration_factor)
 
         # discharging P>0
-        self.power_integrator_charge += (t_hour, abs(min(0, sample.power)) * 1e-3)  # kWh
-        self.power_integrator_discharge += (t_hour, abs(max(0, sample.power)) * 1e-3)  # kWh
+        self.power_integrator_charge += (t_hour, abs(min(0, sample.power_ui)) * 1e-3)  # kWh
+        self.power_integrator_discharge += (t_hour, abs(max(0, sample.power_ui)) * 1e-3)  # kWh
 
         # self.power_stats.add(sample.power)
         sample.temperatures = self._filter_temperatures(sample.temperatures)
@@ -259,7 +259,7 @@ class BmsSampler(BmsSetSwitch):
             sample = sample.invert_current()
 
         self.current_integrator += (t_hour, sample.current)  # Ah
-        self.power_integrator += (t_hour, sample.power * 1e-3)  # kWh
+        self.power_integrator += (t_hour, sample.power_ui * 1e-3)  # kWh
 
         self.cycle_integrator += (t_hour, sample.soc * (0.01 / 2))  # SoC 100->0 is a half cycle
         self.charge_integrator += (t_hour, sample.charge)  # Ah
@@ -298,21 +298,21 @@ class BmsSampler(BmsSetSwitch):
 
         PWR_CHG_REG = 120  # regularisation to suppress changes when power is low
         PWR_CHG_HOLD = 4
-        power_chg = (sample.power - self._last_power) / (abs(self._last_power) + PWR_CHG_REG)
-        if abs(power_chg) > 0.15 and abs(sample.power) > abs(self._last_power):
+        power_chg = (sample.power_ui - self._last_power) / (abs(self._last_power) + PWR_CHG_REG)
+        if abs(power_chg) > 0.15 and abs(sample.power_ui) > abs(self._last_power):
             if self.verbose_log or (
                     not self.period_pub and (t_now - self._t_last_power_jump) > PWR_CHG_HOLD):
                 logger.info('%s Power jump %.0f %% (prev=%.0f last=%.0f, REG=%.0f)', self.name, power_chg * 100,
-                            self._last_power, sample.power, PWR_CHG_REG)
+                            self._last_power, sample.power_ui, PWR_CHG_REG)
             self._t_last_power_jump = t_now
-        self._last_power = sample.power
+        self._last_power = sample.power_ui
         
         # publish home assistant discovery every 120 samples or 10 minutes
         if self.period_discov:
             logger.info("Sending HA discovery for %s (num_samples=%d)", self.name, self.num_samples)
             publish_hass_discovery(
                 mqtt_client, device_topic=self.mqtt_topic_prefix,
-                expire_after_seconds=self.expire_after_seconds,
+                expire_after_seconds=1200,
                 sample=sample,
                 num_cells=len(voltages) if voltages else 0,
                 temperatures=sample.temperatures,

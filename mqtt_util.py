@@ -91,79 +91,6 @@ def remove_none_values(fields: dict):
             if not v:
                 del fields[k]
 
-
-def remove_equal_values(fields: dict, other: dict):
-    if not other:
-        return
-    for k in list(fields.keys()):
-        if k in other and fields[k] == other[k]:
-            del fields[k]
-
-
-def build_mqtt_hass_config_discovery(base, topic):
-    """
-    Generates MQTT Home Assistant configuration discovery topic and data for a given
-    base and topic. This function is tailored for use with a system like Home Assistant
-    to enable automatic discovery and configuration of sensors or metrics for integration
-    with the MQTT platform.
-
-    :param base: The specific identifier or path for the metric being published, used to 
-        generate unique configuration details.
-    :type base: str
-    :param topic: The root or device-specific topic for all MQTT messages, used as an 
-        identifier for the device in MQTT and Home Assistant.
-    :type topic: str
-    :return: A tuple containing the MQTT topic for the Home Assistant discovery configuration, 
-        and a JSON-formatted string representing the configuration data.
-    :rtype: tuple(str, str)
-    """
-    # Instead of daly_bms should be here added a proper name (unique), like serial or something
-    # At this point it can be used only one daly_bms system with hass discovery
-
-    hass_config_topic = f'homeassistant/sensor/{topic}/{base.replace("/", "_")}/config'
-    hass_config_data = {}
-
-    hass_config_data["unique_id"] = f'{topic}_{base.replace("/", "_")}'
-    hass_config_data["name"] = f'{topic} {base.replace("/", " ")}'
-
-    # see https://www.home-assistant.io/integrations/sensor/
-
-    if 'soc_percent' in base or base.endswith('/soc'):
-        hass_config_data["device_class"] = 'battery'
-        hass_config_data["unit_of_measurement"] = '%'
-    elif 'voltage' in base:
-        hass_config_data["device_class"] = 'voltage'
-        hass_config_data["unit_of_measurement"] = 'V'
-    elif 'current' in base:
-        hass_config_data["device_class"] = 'current'
-        hass_config_data["unit_of_measurement"] = 'A'
-    elif 'power' in base:
-        hass_config_data["device_class"] = 'power'
-        hass_config_data["unit_of_measurement"] = 'W'
-    elif 'capacity' in base or base.endswith('/charge'):
-        # hass_config_data["device_class"] = ''
-        hass_config_data["unit_of_measurement"] = 'Ah'
-    elif 'temperatures' in base:
-        hass_config_data["device_class"] = 'temperature'
-        hass_config_data["unit_of_measurement"] = '°C'
-    else:
-        pass
-
-    # hass_config_data["json_attributes_topic"] = f'{topic}{base}'
-    hass_config_data["state_topic"] = f'{topic}{base}'
-
-    hass_device = {
-        "identifiers": [topic],  # daly_bms
-        "manufacturer": topic,  # Daly
-        "model": 'Currently not available',
-        "name": topic,  # Daly BMS
-        "sw_version": 'Currently not available'
-    }
-    hass_config_data["device"] = hass_device
-
-    return hass_config_topic, json.dumps(hass_config_data)
-
-
 _last_values = {}
 _last_publish_time = 0.
 
@@ -241,7 +168,14 @@ sample_desc = {
         "device_class": "power",
         "state_class": "measurement",
         "unit_of_measurement": "W",
-        "precision": 4,
+        "precision": 3,
+        "icon": "flash"},
+    "soc/power_ui": {
+        "field": "power_ui",
+        "device_class": "power",
+        "state_class": "measurement",
+        "unit_of_measurement": "W",
+        "precision": 3,
         "icon": "flash"},
     "soc/capacity": {
         "field": "capacity",

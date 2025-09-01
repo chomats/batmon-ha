@@ -323,7 +323,14 @@ class BmsSample:
         """
         :return: Power (P=U*I) in W
         """
-        return (self.voltage * self.current) if math.isnan(self._power) else self._power
+        return 0 if math.isnan(self._power) else self._power
+    
+    @property
+    def power_ui(self):
+        """
+        :return: Power (P=U*I) in W
+        """
+        return self.voltage * self.current
 
     def values(self):
         return {**self.__dict__, "power": self.power}
