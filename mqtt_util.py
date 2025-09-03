@@ -218,6 +218,12 @@ sample_desc = {
         "state_class": None,
         "unit_of_measurement": "",
         "precision": 0},
+    "bms/balance_line_resistance_status": {
+        "field": "balance_line_resistance_status",
+        "device_class": "problem",
+        "state_class": None,
+        "unit_of_measurement": "",
+        "precision": 0},
     "meter/sample_count": {
         "field": "num_samples",
         "device_class": None,

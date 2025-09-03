@@ -257,7 +257,16 @@ class BmsSample:
                  trame_str=None,
                  temp_moyenne=None,
                  temp_max=None,
-                 temp_min=None, ):
+                 temp_min=None,
+                 charge_status=None,
+                 discharge_status=None,
+                 heating_current=None,
+                 bat_voltage=None,
+                 bat_voltage_correct=None,
+                 vol_discharge_current=None,
+                 vol_charge_current=None,
+                 bat_discharge_current_correct=None,
+                 emergency_switch_time=None,):
         """
 
         :param voltage:
@@ -276,7 +285,7 @@ class BmsSample:
         self.address = ad
         self.voltage: float = voltage
         self.current: float = current or 0  # -
-        self._power = power  # 0 -> +0
+        self._power = power * 1 if charge_status else -1 if discharge_status else 0
         self.balance_current = balance_current
 
         # infer soc from capacity if soc is nan or type(soc)==int (for higher precision)
@@ -316,7 +325,16 @@ class BmsSample:
         self.setting : Optional[SettingsData]= None
         if alarm is not None:
             self.protection = Protection()
-            self.to_protection_bits(self.alarm)
+            self.to_protection_bits(alarm)
+        self.charge_status = charge_status
+        self.discharge_status = discharge_status
+        self.heating_current = heating_current
+        self.bat_voltage = bat_voltage
+        self.bat_voltage_correct = bat_voltage_correct
+        self.vol_discharge_current = vol_discharge_current
+        self.vol_charge_current = vol_charge_current
+        self.bat_discharge_current_correct = bat_discharge_current_correct
+        self.emergency_switch_time = emergency_switch_time
 
         if switches:
             assert all(map(lambda x: isinstance(x, bool), switches.values())), "non-bool switches values %s" % switches

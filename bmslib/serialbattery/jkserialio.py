@@ -1,5 +1,6 @@
 import asyncio
 import queue
+import struct
 import sys
 import time
 from typing import Union, Optional
@@ -641,7 +642,151 @@ loggin
         """
         self.cmd.put_nowait((cmd, address))
 
-
+# 0x1200  0x0000  0   UINT16  2   R   Cell voltage 0                                      CellVol0            mV
+#         0x0002  2   UINT16  2   R   Cell voltage 1                                      CellVol1            mV
+#         0x0004  4   UINT16  2   R   Cell voltage 2                                      CellVol2            mV
+#         0x0006  6   UINT16  2   R   Cell voltage 3                                      CellVol3            mV
+#         0x0008  8   UINT16  2   R   Cell voltage 4                                      CellVol4            mV
+#         0x000A  10  UINT16  2   R   Cell voltage 5                                      CellVol5            mV
+#         0x000C  12  UINT16  2   R   Cell voltage 6                                      CellVol6            mV
+#         0x000E  14  UINT16  2   R   Cell voltage 7                                      CellVol7            mV
+#         0x0010  16  UINT16  2   R   Cell voltage 8                                      CellVol8            mV
+#         0x0012  18  UINT16  2   R   Cell voltage 9                                      CellVol9            mV
+#         0x0014  20  UINT16  2   R   Cell voltage 10                                     CellVol10           mV
+#         0x0016  22  UINT16  2   R   Cell voltage 11                                     CellVol11           mV
+#         0x0018  24  UINT16  2   R   Cell voltage 12                                     CellVol12           mV
+#         0x001A  26  UINT16  2   R   Cell voltage 13                                     CellVol13           mV
+#         0x001C  28  UINT16  2   R   Cell voltage 14                                     CellVol14           mV
+#         0x001E  30  UINT16  2   R   Cell voltage 15                                     CellVol15           mV
+#         0x0020  32  UINT16  2   R   Cell voltage 16                                     CellVol16           mV
+#         0x0022  34  UINT16  2   R   Cell voltage 17                                     CellVol17           mV
+#         0x0024  36  UINT16  2   R   Cell voltage 18                                     CellVol18           mV
+#         0x0026  38  UINT16  2   R   Cell voltage 19                                     CellVol19           mV
+#         0x0028  40  UINT16  2   R   Cell voltage 20                                     CellVol20           mV
+#         0x002A  42  UINT16  2   R   Cell voltage 21                                     CellVol21           mV
+#         0x002C  44  UINT16  2   R   Cell voltage 22                                     CellVol22           mV
+#         0x002E  46  UINT16  2   R   Cell voltage 23                                     CellVol23           mV
+#         0x0030  48  UINT16  2   R   Cell voltage 24                                     CellVol24           mV
+#         0x0032  50  UINT16  2   R   Cell voltage 25                                     CellVol25           mV
+#         0x0034  52  UINT16  2   R   Cell voltage 26                                     CellVol26           mV
+#         0x0036  54  UINT16  2   R   Cell voltage 27                                     CellVol27           mV
+#         0x0038  56  UINT16  2   R   Cell voltage 28                                     CellVol28           mV
+#         0x003A  58  UINT16  2   R   Cell voltage 29                                     CellVol29           mV
+#         0x003C  60  UINT16  2   R   Cell voltage 30                                     CellVol30           mV
+#         0x003E  62  UINT16  2   R   Cell voltage 31                                     CellVol31           mV
+#         0x0040  64  UINT32  4   R   Battery status                                      CellSta                 BIT[n] is 1, indicating that the battery exists
+#         0x0044  68  UINT16  2   R   Cell average voltage                                CellVolAve          mV
+#         0x0046  70  UINT16  2   R   Maximum voltage difference                          CellVdifMax         mV
+#         0x0048  72  UINT8   2   R   Maximum voltage cell number                         MaxVolCellNbr
+#                     UINT8       R   Minimum voltage cell number                         MinVolCellNbr
+#         0x004A  74  UINT16  2   R   Balance line resistance 0                           CellWireRes0        mΩ
+#         0x004C  76  UINT16  2   R   Balance line resistance 1                           CellWireRes1        mΩ
+#         0x004E  78  UINT16  2   R   Balance line resistance 2                           CellWireRes2        mΩ
+#         0x0050  80  UINT16  2   R   Balance line resistance 3                           CellWireRes3        mΩ
+#         0x0052  82  UINT16  2   R   Balance line resistance 4                           CellWireRes4        mΩ
+#         0x0054  84  UINT16  2   R   Balance line resistance 5                           CellWireRes5        mΩ
+#         0x0056  86  UINT16  2   R   Balance line resistance 6                           CellWireRes6        mΩ
+#         0x0058  88  UINT16  2   R   Balance line resistance 7                           CellWireRes7        mΩ
+#         0x005A  90  UINT16  2   R   Balance line resistance 8                           CellWireRes8        mΩ
+#         0x005C  92  UINT16  2   R   Balance line resistance 9                           CellWireRes9        mΩ
+#         0x005E  94  UINT16  2   R   Balance line resistance 10                          CellWireRes10       mΩ
+#         0x0060  96  UINT16  2   R   Balance line resistance 11                          CellWireRes11       mΩ
+#         0x0062  98  UINT16  2   R   Balance line resistance 12                          CellWireRes12       mΩ
+#         0x0064  100 UINT16  2   R   Balance line resistance 13                          CellWireRes13       mΩ
+#         0x0066  102 UINT16  2   R   Balance line resistance 14                          CellWireRes14       mΩ
+#         0x0068  104 UINT16  2   R   Balance line resistance 15                          CellWireRes15       mΩ
+#         0x006A  106 UINT16  2   R   Balance line resistance 16                          CellWireRes16       mΩ
+#         0x006C  108 UINT16  2   R   Balance line resistance 17                          CellWireRes17       mΩ
+#         0x006E  110 UINT16  2   R   Balance line resistance 18                          CellWireRes18       mΩ
+#         0x0070  112 UINT16  2   R   Balance line resistance 19                          CellWireRes19       mΩ
+#         0x0072  114 UINT16  2   R   Balance line resistance 20                          CellWireRes20       mΩ
+#         0x0074  116 UINT16  2   R   Balance line resistance 21                          CellWireRes21       mΩ
+#         0x0076  118 UINT16  2   R   Balance line resistance 22                          CellWireRes22       mΩ
+#         0x0078  120 UINT16  2   R   Balance line resistance 23                          CellWireRes23       mΩ
+#         0x007A  122 UINT16  2   R   Balance line resistance 24                          CellWireRes24       mΩ
+#         0x007C  124 UINT16  2   R   Balance line resistance 25                          CellWireRes25       mΩ
+#         0x007E  126 UINT16  2   R   Balance line resistance 26                          CellWireRes26       mΩ
+#         0x0080  128 UINT16  2   R   Balance line resistance 27                          CellWireRes27       mΩ
+#         0x0082  130 UINT16  2   R   Balance line resistance 28                          CellWireRes28       mΩ
+#         0x0084  132 UINT16  2   R   Balance line resistance 29                          CellWireRes29       mΩ
+#         0x0086  134 UINT16  2   R   Balance line resistance 30                          CellWireRes30       mΩ
+#         0x0088  136 UINT16  2   R   Balance line resistance 31                          CellWireRes31       mΩ
+#         0x008A  138 INT16   2   R   Power board temperature                             TempMos 0.1°C
+#         0x008C  140 UINT32  4   R   Balance line resistance status                      CellWireResSta          BIT[n] is 1, indicating that the balance line alarm
+#         0x0090  144 UINT32  4   R   Total battery voltage                               BatVol              mV
+#         0x0094  148 UINT32  4   R   Battery power                                       BatWatt             mW
+#         0x0098  152 INT32   4   R   Battery current                                     BatCurrent          mA
+#         0x009C  156 INT16   2   R   Battery temperature                                 TempBat1            0.1°C
+#         0x009E  158 INT16   2   R   Battery temperature                                 TempBat2            0.1°C
+#         0x00A0  160 UINT32  4   R   Balance line resistance is too large                AlarmWireRes            1: Fault; 0: Normal     BIT0
+#                                     MOS over temperature protection                     AlarmMosOTP             1: fault; 0: normal     BIT1
+#                                     The number of cells does not match the set value.   AlarmCellQuantity       1: Fault; 0: Normal     BIT2
+#                                     Current sensor abnormality                          AlarmCurSensorErr       1: fault; 0: normal     BIT3
+#                                     Single cell overvoltage protection                  AlarmCellOVP            1: fault; 0: normal     BIT4
+#                                     Battery overvoltage protection                      AlarmBatOVP             1: fault; 0: normal     BIT5
+#                                     Charging overcurrent protection                     AlarmChOCP              1: fault; 0: normal     BIT6
+#                                     Charging short circuit protection                   AlarmChSCP              1: fault; 0: normal     BIT7
+#                                     Charging over-temperature protection                AlarmChOTP              1: fault; 0: normal     BIT8
+#                                     Charging low temperature protection                 AlarmChUTP              1: fault; 0: normal     BIT9
+#                                     Internal communication abnormality                  AlarmCPUAuxCommuErr     1: Fault; 0: Normal     BIT10
+#                                     Cell undervoltage protection                        AlarmCellUVP            1: fault; 0: normal     BIT11
+#                                     Battery undervoltage protection                     AlarmBatUVP             1: fault; 0: normal     BIT12
+#                                     Discharge overcurrent protection                    AlarmDchOCP             1: fault; 0: normal     BIT13
+#                                     Discharge short circuit protection                  AlarmDchSCP             1: fault; 0: normal     BIT14
+#                                     Discharge over-temperature protection               AlarmDchOTP             1: fault; 0: normal     BIT15
+#                                     Charging tube abnormality                           AlarmChargeMOS          1: fault; 0: normal     BIT16
+#                                     Discharge tube abnormality                          AlarmDischargeMOS       1: fault; 0: normal     BIT17
+#                                     GPS disconnected                                    GPSDisconneted          1: fault; 0: normal     BIT18
+#                                     Please modify the authorization password in time    Modify PWD. in time     1: Fault; 0: Normal     BIT19
+#                                     Discharge start failure                             Discharge On Failed     1: Failure; 0: Normal   BIT20
+#                                     Battery over-temperature alarm                      Battery Over Temp Alarm 1: Fault; 0: Normal     BIT21
+#                                     Temperature sensor abnormality                      Temperature sensor anomaly
+#                                     Parallel module failure                             PLCModule anomaly
+#         0x00A4  164 INT16   2   R   Balancing current                                   BalanCurrent        mA
+#         0x00A6  166 UINT8   2   R   Balancing state                                     BalanSta            %   2: discharge; 1: charge; 0: off
+#                     UINT8       R   Remaining power                                     SOCStateOfcharge
+#         0x00A8  168 INT32   4   R   Remaining capacity                                  SOCCapRemain        mAH
+#         0x00AC  172 UINT32  4   R   Actual battery capacity                             SOCFullChargeCap    mAH
+#         0x00B0  176 UINT32  4   R   Number of cycles                                    SOCCycleCount       times
+#         0x00B4  180 UINT32  4   R   Total cycle capacity                                SOCCycleCap         mAH
+#         0x00B8  184 UINT8   2   R   SOH estimate                                        SOCSOH %
+#                     UINT8       R   Pre-charge status                                   Precharge               1: open; 0: close
+#         0x00BA  186 UINT16  2   R   User layer alarm                                    UserAlarm
+#         0x00BC  188 UINT32  4   R   Run time                                            Runtime             S
+#         0x00C0  192 UINT8   2   R   Charge status                                       Charge                  1: open; 0: close
+#                     UINT8       R   Discharge status                                    Discharge               1: open; 0: close
+#         0x00C2  194 UINT16  2   R   User layer alarm 2                                  UserAlarm2
+#         0x00C4  196 UINT16  2   R   Discharge overcurrent protection release time       TimeDcOCPR          S
+#         0x00C6  198 UINT16  2   R   Discharge short circuit protection release time     TimeDcSCPR          S
+#         0x00C8  200 UINT16  2   R   Charging overcurrent protection release time        TimeCOCPR           S
+#         0x00CA  202 UINT16  2   R   Charging short circuit protection release time      TimeCSCPR           S
+#         0x00CC  204 UINT16  2   R   Single undervoltage protection release time         TimeUVPR            S
+#         0x00CE  206 UINT16  2   R   Single overvoltage protection release time          TimeOVPR            S
+#         0x00D0  208 UINT8   2   R   MOS temperature sensor                              MOSTempSensorAbsent                             BIT0
+#                                     Battery temperature sensor 1                        BATTempSensor1Absent    1: Normal; 0: Missing   BIT1
+#                                     Battery temperature sensor 2                        BATTempSensor2Absent    1: Normal; 0: Missing   BIT2
+#                                     Battery temperature sensor 3                        BATTempSensor3Absent    1: Normal; 0: Missing   BIT3
+#                                     Battery temperature sensor 4                        BATTempSensor4Absent    1: Normal; 0: Missing   BIT4
+#                                     Battery temperature sensor 5                        BATTempSensor5Absent    1: Normal; 0: Missing   BIT5
+#                                     Heating status                                      Heating                 1: On; 0: Off
+#         0x00D2  210 UINT16  2   R   Reserved
+#         0x00D4  212 UINT16  2   R   Emergency switch time                               TimeEmergency       S
+#         0x00D6  214 UINT16  2   R   Discharge current correction factor                 BatDisCurCorrect
+#         0x00D8  216 UINT16  2   R   Charging current sensor voltage                     VolChargCur         mV
+#         0x00DA  218 UINT16  2   R   Discharge current sensor voltage                    VolDischargCur      mV
+#         0x00DC  220 FLOAT   4   R   Battery voltage correction factor                   BatVolCorrect
+#         0x00E4  228 UINT16  2   R   Battery voltage                                     BatVol              0.01V
+#         0x00E6  230 INT16   2   R   Heating current                                     HeatCurrent         mA
+#         0x00EE  238 UINT8   2   R   Reserved RVD
+#                     UINT8       R   Charger status                                      ChargerPlugged          1: plugged in; 0: not plugged in
+#         0x00F0  240 UINT32  4   R   System beat                                         SysRunTicks         0.1S
+#         0x00F8  248 INT16   2   R   Battery temperature                                 TempBat3            0.1°C
+#         0x00FA  250 INT16   2   R   Battery temperature                                 TempBat4            0.1°C
+#         0x00FC  252 INT16   2   R   Battery temperature                                 TempBat5            0.1°C
+#         0x0100  256 UINT32  4   R   RTC counter                                         RTCTicks                Starts counting from 2020-1-1
+#         0x0108  264 UINT32  4   R   Sleep time                                          TimeEnterSleep      S
+#         0x010C  268 UINT8   2   R   Parallel current limiting module status             PCLModuleSta            1: open; 0: close
+#                     UINT8           Reserved RVD
 def s_decode_sample(is_new_11fw_32s, logger,
                     num_cells,
                     buf: bytearray, buf_set: bytearray|None,
@@ -688,12 +833,13 @@ def s_decode_sample(is_new_11fw_32s, logger,
         logger.debug('New 11.x firmware, offset=%s', offset)
 
     i16 = lambda i: int.from_bytes(buf[i:(i + 2)], byteorder='little', signed=True)
-    u8 = lambda i: int.from_bytes(buf[i:(i + 1)], byteorder='little', signed=True)
+    u8 = lambda i: int.from_bytes(buf[i:(i + 1)], byteorder='little', signed=False)
     u16 = lambda i: int.from_bytes(buf[i:(i + 2)], byteorder='little', signed=False)
     u32 = lambda i: int.from_bytes(buf[i:(i + 4)], byteorder='little', signed=False)
-    f16u = lambda i: u16(i) * 1e-3
-    f32u = lambda i: u32(i) * 1e-3
-    f32s = lambda i: int.from_bytes(buf[i:(i + 4)], byteorder='little', signed=True) * 1e-3
+    u16_1e3 = lambda i: u16(i) * 1e-3
+    u32_1e3 = lambda i: u32(i) * 1e-3
+    float32 = lambda i: struct.unpack('<f', buf[i:(i + 4)])[0]
+    s32_1e3 = lambda i: int.from_bytes(buf[i:(i + 4)], byteorder='little', signed=True) * 1e-3
 
     temp = lambda x: float('nan') if x == -2000 else (x / 10)
 
@@ -714,7 +860,7 @@ def s_decode_sample(is_new_11fw_32s, logger,
     temperatures = [temp(i16(130 + offset)), temp(i16(132 + offset))]
     if is_new_11fw_32s:
         temperatures += [temp(i16(222 + offset)), temp(i16(224 + offset)), temp(i16(226 + offset))]
-        #252,258
+        #248, 252, 250
     ## 0x00D0  208+6 UINT8   2   R   MOS temperature sensor                              MOSTempSensorAbsent                             BIT0
     # Battery temperature sensor 1                        BATTempSensor1Absent    1: Normal; 0: Missing   BIT1
     # Battery temperature sensor 2                        BATTempSensor2Absent    1: Normal; 0: Missing   BIT2
@@ -738,7 +884,7 @@ def s_decode_sample(is_new_11fw_32s, logger,
             temp_count+=1
     temp_moyenne = temp_somme/temp_count
     
-    temp_status = u8(214)
+    temp_status = u8(208 + 6)
     temp_status_flag = [
         temp_status & 0x01 == 0x01 ,
         temp_status & 0x02 == 0x02 ,
@@ -762,43 +908,79 @@ def s_decode_sample(is_new_11fw_32s, logger,
     #         0x0048  72  UINT8   2   R   Maximum voltage cell number                         MaxVolCellNbr
     #                 73  UINT8       R   Minimum voltage cell number                         MinVolCellNbr
 
+    #         0x00BC  188 UINT32  4   R   Run time                                            Runtime             S
+    #         0x00C0  192 UINT8   2   R   Charge status                                       Charge                  1: open; 0: close
+    #                     UINT8       R   Discharge status                                    Discharge               1: open; 0: close
+    uptime=float(u32(162 + offset)),  # seconds 188
+    
+    
     return BmsSample(
         trame_str=trame_str,
         ad=u8(300),
+        # 0x0040  64  UINT32  4   R   Battery status                                      CellSta                 BIT[n] is 1, indicating that the battery exists
         battery_status=u32(70),
-        cell_average_voltage=f16u(74),
-        maximum_voltage_difference=f16u(76),
+        # 0x0044  68  UINT16  2   R   Cell average voltage                                CellVolAve          mV
+        cell_average_voltage=u16_1e3(74),
+        # 0x0046  70  UINT16  2   R   Maximum voltage difference                          CellVdifMax         mV
+        maximum_voltage_difference=u16_1e3(76),
+        # 0x0048  72  UINT8   2   R   Maximum voltage cell number                         MaxVolCellNbr
         maximum_voltage_cell_index=u8(78),
+        #             UINT8       R   Minimum voltage cell number                         MinVolCellNbr
         minimum_voltage_cell_index=u8(79),
         voltages = voltages,
         resistances = [u16(80 + i * 2) for i in range(num_cells)],
         #144
         mos_temperature=mos_temperature,
         temp_status_flag=temp_status_flag,
-        #146
-        balance_line_resistance_status=f32u(146),
-        #150
-        voltage=f32u(118 + offset), #150
-        power=f32u(122 + offset), #152
-        current=-f32s(126 + offset), #158
+        # 0x008C  140 UINT32  4   R   Balance line resistance status                      CellWireResSta          BIT[n] is 1, indicating that the balance line alarm
+        balance_line_resistance_status=u32_1e3(146),
+        # 0x0090  144 UINT32  4   R   Total battery voltage                               BatVol              mV
+        voltage=u32_1e3(118 + offset), #150
+        # 0x0094  148 UINT32  4   R   Battery power                                       BatWatt             mW
+        power=u32_1e3(122 + offset), #152
+        # 0x0098  152 INT32   4   R   Battery current                                     BatCurrent          mA
+        current=-s32_1e3(126 + offset), #158
         #162 T1
         #164 T2
-        #166 protection bit
+        #         0x00A0  160 UINT32  4   R   Balance line resistance is too large                AlarmWireRes            1: Fault; 0: Normal     BIT0
+        #                                     MOS over temperature protection                     AlarmMosOTP             1: fault; 0: normal     BIT1
+        #                                     The number of cells does not match the set value.   AlarmCellQuantity       1: Fault; 0: Normal     BIT2
+        #                                     Current sensor abnormality                          AlarmCurSensorErr       1: fault; 0: normal     BIT3
+        #                                     Single cell overvoltage protection                  AlarmCellOVP            1: fault; 0: normal     BIT4
+        #                                     Battery overvoltage protection                      AlarmBatOVP             1: fault; 0: normal     BIT5
+        #                                     Charging overcurrent protection                     AlarmChOCP              1: fault; 0: normal     BIT6
+        #                                     Charging short circuit protection                   AlarmChSCP              1: fault; 0: normal     BIT7
+        #                                     Charging over-temperature protection                AlarmChOTP              1: fault; 0: normal     BIT8
+        #                                     Charging low temperature protection                 AlarmChUTP              1: fault; 0: normal     BIT9
+        #                                     Internal communication abnormality                  AlarmCPUAuxCommuErr     1: Fault; 0: Normal     BIT10
+        #                                     Cell undervoltage protection                        AlarmCellUVP            1: fault; 0: normal     BIT11
+        #                                     Battery undervoltage protection                     AlarmBatUVP             1: fault; 0: normal     BIT12
+        #                                     Discharge overcurrent protection                    AlarmDchOCP             1: fault; 0: normal     BIT13
+        #                                     Discharge short circuit protection                  AlarmDchSCP             1: fault; 0: normal     BIT14
+        #                                     Discharge over-temperature protection               AlarmDchOTP             1: fault; 0: normal     BIT15
+        #                                     Charging tube abnormality                           AlarmChargeMOS          1: fault; 0: normal     BIT16
+        #                                     Discharge tube abnormality                          AlarmDischargeMOS       1: fault; 0: normal     BIT17
+        #                                     GPS disconnected                                    GPSDisconneted          1: fault; 0: normal     BIT18
+        #                                     Please modify the authorization password in time    Modify PWD. in time     1: Fault; 0: Normal     BIT19
+        #                                     Discharge start failure                             Discharge On Failed     1: Failure; 0: Normal   BIT20
+        #                                     Battery over-temperature alarm                      Battery Over Temp Alarm 1: Fault; 0: Normal     BIT21
+        #                                     Temperature sensor abnormality                      Temperature sensor anomaly
+        #                                     Parallel module failure                             PLCModule anomaly
         alarm=u32(166),
-        #170
+        # 0x00A4  164 INT16   2   R   Balancing current                                   BalanCurrent        mA
         balance_current=i16(138 + offset) / 1000, #170
-        #172 discard
+        #  0x00A6  166 UINT8   2   R   Balancing state                                     BalanSta            %   2: discharge; 1: charge; 0: off
+        #              UINT8       R   Remaining power                                     SOCStateOfcharge
         balance_state=u8(172),
-        #173
         soc=buf[141 + offset],
-        #174
-        charge=f32u(142 + offset),  # "remaining capacity"
-        #178
-        capacity=f32u(146 + offset),  # computed capacity (starts at self.capacity, which is user-defined),
-        #182
+        # 0x00A8  168 INT32   4   R   Remaining capacity                                  SOCCapRemain        mAH
+        charge=u32_1e3(142 + offset),  # "remaining capacity"
+        # 0x00AC  172 UINT32  4   R   Actual battery capacity                             SOCFullChargeCap    mAH
+        capacity=u32_1e3(146 + offset),  # computed capacity (starts at self.capacity, which is user-defined),
+        # 0x00B0  176 UINT32  4   R   Number of cycles                                    SOCCycleCount       times
         num_cycles=u32(150 + offset),
-        #186
-        cycle_capacity=f32u(154 + offset),  # total charge TODO rename cycle charge
+        # 0x00B4  180 UINT32  4   R   Total cycle capacity                                SOCCycleCap         mAH
+        cycle_capacity=u32_1e3(154 + offset),  # total charge TODO rename cycle charge
         temperatures=temperatures,
         temp_min=temp_min,
         temp_max=temp_max,
@@ -813,10 +995,27 @@ def s_decode_sample(is_new_11fw_32s, logger,
             balance=bool(buf_set[126]),
             **(dict(float_charge=bool(buf_set[283] & 2)) if has_float_charger else {}),
         ) if buf_set else {},
-        #  #buf[166 + offset]),  charge FET state
-        # buf[167 + offset]), discharge FET state
-        # 184
+        # 0x00BC  188 UINT32  4   R   Run time                                            Runtime             S
         uptime=float(u32(162 + offset)),  # seconds
+        # 0x00C0  192 UINT8   2   R   Charge status                                       Charge                  1: open; 0: close
+        charge_status=u8(166 + offset),
+        #             UINT8       R   Discharge status                                    Discharge               1: open; 0: close
+        discharge_status=u8(167 + offset),
+        #         0x00D4  212 UINT16  2   R   Emergency switch time                               TimeEmergency       S
+        emergency_switch_time=u32(212 - 32 + 6 + offset),
+        #         0x00D6  214 UINT16  2   R   Discharge current correction factor                 BatDisCurCorrect
+        bat_discharge_current_correct=u16(214 - 32 + 6 + offset),
+        #         0x00D8  216 UINT16  2   R   Charging current sensor voltage                     VolChargCur         mV
+        vol_charge_current=u16_1e3(216 - 32 + 6 + offset),
+        #         0x00DA  218 UINT16  2   R   Discharge current sensor voltage                    VolDischargCur      mV
+        vol_discharge_current=u16_1e3(218 - 32 + 6 + offset),
+        #         0x00DC  220 FLOAT   4   R   Battery voltage correction factor                   BatVolCorrect
+        bat_voltage_correct=float32(220 - 32 + 6 + offset),
+        #         0x00E4  228 UINT16  2   R   Battery voltage                                     BatVol              0.01V
+        bat_voltage=u16(228 - 32 + 6 + offset)/100,
+        #         0x00E6  230 INT16   2   R   Heating current                                     HeatCurrent         mA
+        heating_current=u16_1e3(230 - 32 + 6 + offset),
+        
         timestamp=t_buf,
     )
 # Register Map
