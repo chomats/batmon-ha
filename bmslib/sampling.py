@@ -3,6 +3,7 @@ import math
 import queue
 import re
 import time
+import traceback
 from collections import defaultdict
 from copy import copy
 from typing import Optional
@@ -217,6 +218,7 @@ class BmsSampler(BmsSetSwitch):
                 await self.publish_sample(sample)
             except Exception as e:
                 logger_err.error('exception in action callback: %s', e)
+                logger_err.error("Stack: %s", traceback.format_exc())   
 
     async def set_switch(self, switch: str, state: bool):
         """
