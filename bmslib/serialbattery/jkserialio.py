@@ -61,6 +61,7 @@ class JKSerialIO:
         self.count_bat = count_bat
         self.master = master
         self.cmd = queue.Queue()
+        self.need_setting = False
 
     def get_command_switch(self, switch: str, state: bool, sampler: BmsSampler) -> bytearray | None:
         """
@@ -431,8 +432,9 @@ loggin
                     logger.info(f" period_about")
                     counter = await self.send_cmd_and_read_all_slave(callback, self.command_about, counter, length_fixed, ser)
                 
-                if period_status.counter % 6 == 0:
+                if self.need_setting or period_status.counter % 6 == 0:
                     logger.info(f" period_setting")
+                    self.need_setting = False
                     counter = await self.send_cmd_and_read_all_slave(callback, self.command_settings, counter, length_fixed, ser)
                
                 counter = await self.send_cmd_and_read_all_slave(callback, self.command_status, counter, length_fixed, ser)
@@ -487,9 +489,7 @@ loggin
                 (cmd, address) = self.cmd.get_nowait()
                 logger.debug(f"Send command {cmd} from queue to device {address}")
                 counter = await self.send_cmd_one_slave(address, cmd, counter, length_fixed, ser, callback, 6)
-                await asyncio.sleep(0.01)
-                counter = await self.send_cmd_one_slave(address, self.command_settings, counter, length_fixed,
-                                                        ser, callback)
+                self.need_setting = True
             except queue.Empty:
                 return counter
         return counter
