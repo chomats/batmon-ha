@@ -77,7 +77,11 @@ class PeriodicBoolSignal:
         """
         diff = (time.time() - self._last_t)
         t = self.period - diff
-        
+
+        if not math.isfinite(t) or t < -(self.period*10):
+            self.counter += 1
+            self._last_t += int(time.time())
+            return
         if t <= 0:
             # diff > period
             nb = int(t/self.period) + 1
@@ -85,7 +89,7 @@ class PeriodicBoolSignal:
             self._last_t += nb * self.period
             return
         await asyncio.sleep(t)
-        self.counter+=1
+        self.counter += 1
         self._last_t += self.period
 
     def set_time(self):
@@ -103,6 +107,11 @@ class PeriodicBoolSignal:
         diff = (time.time() - self._last_t)
         t = self.period - diff
         logger.debug("%s set_time: %s", str(self.period), str(t))
+        if not math.isfinite(t) or t < -(self.period*10):
+            self.counter += 1
+            self._last_t += int(time.time())
+            self.state = True
+            return 0
         if t <= 0:
             nb = int(t/self.period) + 1
             self.counter+=nb
