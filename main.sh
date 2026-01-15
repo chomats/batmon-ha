@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 trap restart 3
 trap call_exit 9
