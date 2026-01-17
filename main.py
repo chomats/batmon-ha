@@ -43,11 +43,8 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-log_file_name="batmon-ha.jkbms-app.log"
-log_file_name_err="batmon-ha.jkbms-app-err.log"
-if args.console:
-    log_file_name="stdout"
-    log_file_name_err="stderr"
+log_file_name="stdout"
+log_file_name_err="stderr"
 logger_root = get_logger(verbose=args.verbose, log_file_name=log_file_name)
 logger_err = get_logger_err(log_file_name=log_file_name_err)
 

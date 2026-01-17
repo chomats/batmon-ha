@@ -20,7 +20,7 @@ class dotdict(dict):
 
 loggers = {}
 
-def get_logger(verbose=False, name="main", log_file_name="batmon-ha.jkbms-app.log"):
+def get_logger(verbose=False, name="main", log_file_name="stdout"):
     global loggers
     if name in loggers:
         return loggers[name]
@@ -53,7 +53,7 @@ def get_logger_child(child_name, verbose=False):
         return get_logger()
     return get_logger().getChild(child_name)
 
-def get_logger_err(log_file_name="batmon-ha.jkbms-app-err.log"):
+def get_logger_err(log_file_name="stderr"):
     return get_logger(name="error", log_file_name=log_file_name)
 
 def set_log_levels(log_levels):
