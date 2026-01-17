@@ -39,7 +39,7 @@ parser.add_argument(
     "-l", "--verbose", action='store_true', help="verbose log"
 )
 parser.add_argument(
-    "-s", "--console", action='store_true', help="console log"
+    "-x", "--console", action='store_true', help="console log"
 )
 args = parser.parse_args()
 
