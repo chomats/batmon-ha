@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import string
+import sys
 import time
 from logging.handlers import TimedRotatingFileHandler
 
@@ -27,9 +28,14 @@ def get_logger(verbose=False, name="main", log_file_name="batmon-ha.jkbms-app.lo
     # log_format = '%(asctime)s %(levelname)-6s [%(filename)s:%(lineno)d] %(message)s'
     log_format = '%(asctime)s %(levelname)s %(name)s [%(module)s] %(message)s'
     formatter = logging.Formatter(log_format)
+    if log_file_name == "stderr":
+        handler = logging.StreamHandler(sys.stderr)
+    elif log_file_name == "stdout":
+        handler = logging.StreamHandler(sys.stdout)
+    else:
+        handler = TimedRotatingFileHandler(log_file_name, when="H", interval=1, backupCount=10)
     # set TimedRotatingFileHandler for root
     # use very short interval for this example, typical 'when' would be 'midnight' and no explicit interval
-    handler = TimedRotatingFileHandler(log_file_name, when="H", interval=1, backupCount=10)
     handler.setFormatter(formatter)
     logger = logging.getLogger(name) # or pass string to give it a name
     logger.addHandler(handler)
@@ -47,8 +53,8 @@ def get_logger_child(child_name, verbose=False):
         return get_logger()
     return get_logger().getChild(child_name)
 
-def get_logger_err():
-    return get_logger(name="error", log_file_name="batmon-ha.jkbms-app-err.log")
+def get_logger_err(log_file_name="batmon-ha.jkbms-app-err.log"):
+    return get_logger(name="error", log_file_name=log_file_name)
 
 def set_log_levels(log_levels):
     logger = get_logger_child("logging")

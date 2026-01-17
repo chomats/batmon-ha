@@ -38,9 +38,18 @@ parser.add_argument("-s", "--skip-discovery", action='store_true', help="skip di
 parser.add_argument(
     "-l", "--verbose", action='store_true', help="verbose log"
 )
+parser.add_argument(
+    "-s", "--console", action='store_true', help="console log"
+)
 args = parser.parse_args()
 
-logger_root = get_logger(verbose=args.verbose)
+log_file_name="batmon-ha.jkbms-app.log"
+log_file_name_err="batmon-ha.jkbms-app-err.log"
+if args.console:
+    log_file_name="stdout"
+    log_file_name_err="stderr"
+logger_root = get_logger(verbose=args.verbose, log_file_name=log_file_name)
+logger_err = get_logger_err(log_file_name=log_file_name_err)
 
 user_config = get_user_config(args.config)
 
@@ -52,7 +61,7 @@ if user_config.get('console_log', False):
     logger_root.addHandler(steamHandlerOut)
     steamHandlerErr = logging.StreamHandler(sys.stderr)
     steamHandlerErr.setFormatter(formatter)
-    get_logger_err().addHandler(steamHandlerOut)
+    logger_err.addHandler(steamHandlerOut)
 
 logger_err = get_logger_err().getChild("main")
 logger = get_logger_child("main")
