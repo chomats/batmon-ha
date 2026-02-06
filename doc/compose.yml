@@ -104,7 +104,8 @@ services:
       - "1883:1883" #default mqtt port
       - "9001:9001" #default mqtt port for websockets
     volumes:
-      - /var/lib/homeassistant/addons/data/core_mosquitto:/mosquitto:rw
+      - mosquitto_data:/mosquitto/data:rw
+      - mosquitto_log:/mosquitto/log:rw
     restart: unless-stopped
     networks:
       - ha_networks
@@ -144,7 +145,7 @@ services:
 
   homeassistant:
     container_name: homeassistant
-    image: "homeassistant/aarch64-homeassistant:2026.1.2"
+    image: "homeassistant/aarch64-homeassistant:2026.2.0"
     volumes:
       - /var/lib/homeassistant/homeassistant:/config
       - /var/lib/homeassistant/ssl:/ssl:ro
@@ -173,7 +174,8 @@ services:
 volumes:
   grafana-storage: {}
   prometheus_data: {}
+  mosquitto_data: {}
+  mosquitto_log: {}
 networks:
   ha_networks:
     driver: bridge
-
