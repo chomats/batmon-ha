@@ -1,0 +1,178 @@
+services:
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    expose:
+      - 9100
+    networks:
+      - ha_networks
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    expose:
+      - 9090
+    ports:
+      - 9090:9090
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - ha_networks
+  mqtt-exporter:
+    image: kpetrem/mqtt-exporter
+    container_name: mqtt_exporter
+    restart: unless-stopped
+    ports:
+      - 9000:9000
+    environment:
+      - MQTT_ADDRESS=mqtt5
+    links:
+      - mqtt5
+    networks:
+      - ha_networks
+  cadvisor:
+    image: nazman/cadvisor:latest
+    container_name: monitoring_cadvisor
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /etc/machine-id:/etc/machine-id:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - '8080:8080'
+    expose:
+      - 8080
+    devices:
+      - "/dev/kmsg"
+    networks:
+      - ha_networks
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    links:
+      - mqtt5
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    networks:
+      - ha_networks
+  mqtt_autodiscovery:
+    container_name: mqtt_autodiscovery
+    image: ghcr.io/pbkhrv/rtl_433-hass-addons-rtl_433_mqtt_autodiscovery-next-aarch64:next
+    restart: unless-stopped
+    links:
+      - mqtt5
+    environment:
+      MQTT_HOST: mqtt5
+      MQTT_PORT: 1883
+      RTL_TOPIC: rtl_433/+/events
+      DISCOVERY_PREFIX: homeassistant
+      DISCOVERY_INTERVAL: 150
+      OTHER_ARGS:
+      LOG_LEVEL: info
+    networks:
+      - ha_networks
+  mqtt5:
+    image: eclipse-mosquitto
+    container_name: mqtt5
+    ports:
+      - "1883:1883" #default mqtt port
+      - "9001:9001" #default mqtt port for websockets
+    volumes:
+      - /var/lib/homeassistant/addons/data/core_mosquitto:/mosquitto:rw
+    restart: unless-stopped
+    networks:
+      - ha_networks
+  rtl433:
+    image: hertzg/rtl_433:latest
+    container_name: rtl433
+    restart: unless-stopped
+    command:
+      - -v
+      - -c
+      - /config/rtl_433.conf
+    volumes:
+      - /home/sch/homeassistant/rtl_433.conf:/config/rtl_433.conf:ro
+    devices:
+      - /dev/bus/usb/001/003
+    links:
+      - mqtt5
+    environment:
+      TZ: Europe/Paris
+    networks:
+      - ha_networks
+  batmon_ha:
+    image: "batmon-ha:latest"
+    container_name: batmon_ha
+    volumes:
+      - ./options.json:/options.json
+    devices:
+      - /dev/ttyUSB0
+    restart: unless-stopped
+    environment:
+      OTHER_ARGS: ""
+    links:
+      - mqtt5
+    networks:
+      - ha_networks
+
+  homeassistant:
+    container_name: homeassistant
+    image: "homeassistant/aarch64-homeassistant:2026.1.2"
+    volumes:
+      - /var/lib/homeassistant/homeassistant:/config
+      - /var/lib/homeassistant/ssl:/ssl:ro
+      - /var/lib/homeassistant/share:/share:bind-propagation=rslave
+      - /var/lib/homeassistant/media:/media:bind-propagation=rslave
+      - /var/lib/homeassistant/tmp/homeassistant_pulse:/etc/pulse/client.conf:ro
+      - /var/lib/homeassistant/audio/external:/run/audio:ro
+      - /var/lib/homeassistant/audio/asound:/etc/asound.conf:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - /var/lib/homeassistant/cid_files/homeassistant.cid:/run/cid:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+    privileged: true
+    links:
+      - mqtt5
+    environment:
+      TZ: Europe/Paris
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      - ha_networks
+volumes:
+  grafana-storage: {}
+  prometheus_data: {}
+networks:
+  ha_networks:
+    driver: bridge
+

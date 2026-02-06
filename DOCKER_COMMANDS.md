@@ -185,3 +185,128 @@ docker login
 ```bash
 docker login registry.example.com
 ```
+
+## 🔄 Vérifier les mises à jour d'images
+
+### Utiliser le script checkDockerUpdates.sh
+```bash
+# Vérifier les images dans doc/compose.yml
+./checkDockerUpdates.sh
+
+# Vérifier un autre fichier compose
+./checkDockerUpdates.sh path/to/compose.yml
+```
+
+### Méthode manuelle : Comparer les digests
+
+#### Vérifier le digest local
+```bash
+docker inspect --format='{{.RepoDigests}}' <image-name>
+```
+
+#### Vérifier le digest distant
+```bash
+docker manifest inspect <image-name> | grep digest
+```
+
+#### Exemple complet
+```bash
+# Image locale
+docker inspect --format='{{.RepoDigests}}' ghcr.io/fl4p/batmon-ha:latest
+
+# Image distante
+docker manifest inspect ghcr.io/fl4p/batmon-ha:latest | grep -m1 digest
+```
+
+### Docker Compose : Pull et mise à jour
+
+#### Vérifier les mises à jour disponibles
+```bash
+cd doc
+docker compose pull --quiet
+docker compose ps
+```
+
+#### Mettre à jour tous les services
+```bash
+docker compose pull
+docker compose up -d
+```
+
+#### Mettre à jour un service spécifique
+```bash
+docker compose pull batmon
+docker compose up -d batmon
+```
+
+### Utiliser docker-compose avec --no-cache
+
+#### Pull forcé (ignorer le cache)
+```bash
+docker compose pull --no-cache
+```
+
+### Watchtower : Mise à jour automatique
+
+#### Installation
+```bash
+docker run -d \
+  --name watchtower \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  containrrr/watchtower \
+  --interval 86400  # Vérifier toutes les 24h
+```
+
+#### Avec notification
+```bash
+docker run -d \
+  --name watchtower \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -e WATCHTOWER_NOTIFICATIONS=email \
+  -e WATCHTOWER_NOTIFICATION_EMAIL_FROM=from@example.com \
+  -e WATCHTOWER_NOTIFICATION_EMAIL_TO=to@example.com \
+  containrrr/watchtower
+```
+
+### Diun : Alternative à Watchtower (notification uniquement)
+
+```bash
+docker run -d \
+  --name diun \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd)/diun.yml:/diun.yml:ro \
+  crazymax/diun:latest
+```
+
+### Vérifier l'âge d'une image
+
+```bash
+# Date de création de l'image locale
+docker inspect --format='{{.Created}}' <image-name>
+
+# Voir les informations complètes
+docker image inspect <image-name>
+```
+
+### Exemples pratiques
+
+#### Script de vérification quotidienne (cron)
+```bash
+# Ajouter à crontab -e
+0 2 * * * /path/to/checkDockerUpdates.sh && echo "Vérification terminée" | mail -s "Docker Updates" user@example.com
+```
+
+#### Mettre à jour et redémarrer
+```bash
+# Un seul service
+docker compose pull batmon && docker compose up -d batmon
+
+# Tous les services
+docker compose pull && docker compose up -d
+```
+
+#### Vérifier sans mettre à jour
+```bash
+# Liste les images qui peuvent être mises à jour
+docker images --format "table {{.Repository}}:{{.Tag}}\t{{.ID}}\t{{.CreatedSince}}"
+```
