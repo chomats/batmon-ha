@@ -78,10 +78,13 @@ echo "$IMAGES" | while read -r image; do
     
     # Pull les métadonnées de l'image distante (sans télécharger l'image)
     echo -e "  ${BLUE}Récupération des métadonnées distantes...${NC}"
-    REMOTE_DIGEST=$(get_remote_digest "$image")
+    REMOTE_DIGEST=$(get_remote_digest "$image" 2>/dev/null)
     
     if [ -z "$REMOTE_DIGEST" ]; then
-        echo -e "  ${RED}✗ Impossible de récupérer les informations distantes${NC}"
+        echo -e "  ${YELLOW}⚠ Impossible de récupérer les informations distantes (accès refusé ou image locale uniquement)${NC}"
+        if [ -n "$LOCAL_DIGEST" ]; then
+            echo -e "  ${GREEN}✓ Image locale disponible${NC}"
+        fi
         echo ""
         continue
     fi

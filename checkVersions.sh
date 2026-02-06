@@ -116,7 +116,7 @@ check_version() {
     # Récupérer les informations distantes
     echo -e "${BLUE}Informations distantes:${NC}"
     
-    # Méthode 1: Vérifier le manifest
+    # Méthode 1: Vérifier le manifest (ignorer les erreurs d'accès)
     if docker manifest inspect "$image" >/dev/null 2>&1; then
         local remote_digest=$(docker manifest inspect "$image" 2>/dev/null | grep -m1 '"digest"' | awk '{print $2}' | tr -d ',"')
         echo -e "  Digest: ${remote_digest:0:20}..."
@@ -124,6 +124,8 @@ check_version() {
         # Extraire les métadonnées du manifest
         local config_digest=$(docker manifest inspect "$image" 2>/dev/null | jq -r '.config.digest' 2>/dev/null || echo "N/A")
         echo -e "  Config: ${config_digest:0:20}..."
+    else
+        echo -e "  ${YELLOW}⚠ Impossible d'accéder aux informations distantes (image locale uniquement ou accès refusé)${NC}"
     fi
     
     echo ""
