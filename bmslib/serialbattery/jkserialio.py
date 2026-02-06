@@ -213,6 +213,22 @@ loggin
             ser.write(bytearray.fromhex(hex_byte))
         return        
 
+    def set_shutdown(self, b):
+        self.shutdown = b
+
+    def is_shutdown(self) -> bool:
+        """
+        Check if the shutdown flag is False (system is still running).
+        
+        This method provides an external way to verify if the system shutdown 
+        has been initiated or not. It can be used to check the operational 
+        status before performing operations.
+        
+        :return: True if shutdown is False (system running), False if shutdown is True
+        :rtype: bool
+        """
+        return self.shutdown
+
     async def read_serial_data(
             self,
             command: any,

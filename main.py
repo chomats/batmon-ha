@@ -123,21 +123,22 @@ def bg_checks(sampler_list, timeout, t_start):
 
     return True
 
-
-def background_thread(timeout: float, sampler_list: List[BmsSampler]):
-    t_start = time.time()
-    while not shutdown:
-        if not bg_checks(sampler_list, timeout, t_start):
-            break
-        time.sleep(4)
-    logger.info("Background thread ends. shutdown=%s", shutdown)
-    time.sleep(10)
-    logger.info("Process still alive, suicide")
-    exit_process(True, True)
+#
+# def background_thread(timeout: float, sampler_list: List[BmsSampler]):
+#     t_start = time.time()
+#     while not shutdown:
+#         if not bg_checks(sampler_list, timeout, t_start):
+#             break
+#         time.sleep(4)
+#     logger.info("Background thread ends. shutdown=%s", shutdown)
+#     time.sleep(10)
+#     logger.info("Process still alive, suicide")
+#     exit_process(True, True)
 
 
 async def background_loop(timeout: float, sampler_list: List[BmsSampler]):
     global shutdown
+    global jk_serial_io
 
     t_start = time.time()
 
@@ -148,7 +149,12 @@ async def background_loop(timeout: float, sampler_list: List[BmsSampler]):
         for bms_s in sampler_list:
             await bms_s.action_queue()
         await mqtt_process_action_queue()
-        if not bg_checks(sampler_list, timeout, t_start):
+        if jk_serial_io.is_shutdown() or not bg_checks(sampler_list, timeout, t_start):
+            logger_err.error("Background thread ends. shutdown=%s", shutdown)
+            jk_serial_io.set_shutdown(True)
+            time.sleep(10)
+            logger_err.error("Process still alive, suicide")
+            exit_process(True, True)
             break
 
         await asyncio.sleep(.1)   
